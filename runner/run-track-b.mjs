@@ -43,21 +43,20 @@ if (selectedModels.length === 0) {
 }
 
 const runId = args["run-id"] || new Date().toISOString().replaceAll(":", "-").replace(/\.\d+Z$/, "Z");
-const results = [];
-let hasFailures = false;
+const concurrency = positiveInteger(args.concurrency, 1);
 
-for (const model of selectedModels) {
+console.log(`Running ${selectedModels.length} model(s) with concurrency ${concurrency}.`);
+const results = await runConcurrent(selectedModels, concurrency, async (model) => {
   const result = await runModelSafely(model, runId);
-  if (result.status === "failed" || result.status === "api_error") {
-    hasFailures = true;
-  }
-  results.push(result);
   console.log(JSON.stringify(result, null, 2));
-}
+  return result;
+});
+
+const hasFailures = results.some((result) => result.status === "failed" || result.status === "api_error");
 
 const summaryPath = path.join(RESULTS_ROOT, `_summaries`, `${runId}.json`);
 await fs.promises.mkdir(path.dirname(summaryPath), { recursive: true });
-await fs.promises.writeFile(summaryPath, JSON.stringify({ runId, results }, null, 2));
+await fs.promises.writeFile(summaryPath, JSON.stringify({ runId, concurrency, results }, null, 2));
 if (hasFailures) {
   process.exitCode = 1;
 }
@@ -237,6 +236,7 @@ async function writeRunArtifacts({ outputDir, model, commands, metadata }) {
     run_config: path.relative(ROOT, RUN_CONFIG_PATH),
     run_config_sha256: runConfigSha256,
     official_attempts_per_model: runConfig.official_attempts_per_model,
+    runner_concurrency: concurrency,
     request_settings: {
       temperature: Number(args.temperature ?? runConfig.request_settings.temperature),
       max_tokens: Number(args["max-tokens"] ?? runConfig.request_settings.max_tokens),
@@ -430,6 +430,29 @@ function parseArgs(argv) {
 
 function asArray(value) {
   return Array.isArray(value) ? value : [value];
+}
+
+async function runConcurrent(items, limit, worker) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+
+  async function runWorker() {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await worker(items[index], index);
+    }
+  }
+
+  const workers = Array.from({ length: Math.min(limit, items.length) }, runWorker);
+  await Promise.all(workers);
+  return results;
+}
+
+function positiveInteger(value, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+  return Math.floor(parsed);
 }
 
 function sha256(value) {

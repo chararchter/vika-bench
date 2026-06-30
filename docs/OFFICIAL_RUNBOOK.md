@@ -20,7 +20,7 @@ npm run sync:public-data
 Official runs use one attempt per model and the settings in `runner/run-config.json`. All model calls are routed through OpenRouter.
 
 ```bash
-npm run run:track-b -- --all --run-id official-v0.1
+npm run run:track-b -- --all --run-id official-v0.1 --concurrency 4
 ```
 
 ## 3. Validate Audit Trail
@@ -34,7 +34,7 @@ npm run validate:audit -- --run-id official-v0.1
 The v0.1 blind Elo judge panel is defined in `runner/judge-config.json`. All judge calls are routed through OpenRouter.
 
 ```bash
-npm run judge -- --run-id official-v0.1 --judgment-run-id official-v0.1-judge
+npm run judge -- --run-id official-v0.1 --judgment-run-id official-v0.1-judge --concurrency 12
 ```
 
 ## 5. Compute Elo

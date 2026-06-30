@@ -315,9 +315,9 @@ cd maddie-bench
 npm run setup
 cp .env.example .env
 # add OPENROUTER_API_KEY to .env
-npm run run:track-b -- --all --run-id official-v0.1
+npm run run:track-b -- --all --run-id official-v0.1 --concurrency 4
 npm run validate:audit -- --run-id official-v0.1
-npm run judge -- --run-id official-v0.1 --judgment-run-id official-v0.1-judge
+npm run judge -- --run-id official-v0.1 --judgment-run-id official-v0.1-judge --concurrency 12
 npm run elo -- --input judgments/official-v0.1-judge/pairwise.json --output leaderboard/elo.official-v0.1.json
 npm run publish:results -- --run-id official-v0.1 --elo leaderboard/elo.official-v0.1.json</code></pre>
       </div>

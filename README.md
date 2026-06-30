@@ -42,6 +42,8 @@ npm run publish:results -- --run-id full-chain-smoke --elo leaderboard/elo.full-
 npm run run:track-b -- --check-env
 npm run run:track-b -- --list
 npm run run:track-b -- --model openai/gpt-5.5 --dry-run
+npm run run:track-b -- --all --run-id official-v0.1 --concurrency 4
+npm run judge -- --run-id official-v0.1 --judgment-run-id official-v0.1-judge --concurrency 12
 ```
 
 ## Local Setup

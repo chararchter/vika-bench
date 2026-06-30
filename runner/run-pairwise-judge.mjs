@@ -37,23 +37,23 @@ const judgmentRunId = args["judgment-run-id"] || `judge-${new Date().toISOString
 const outputDir = path.join(JUDGMENTS_ROOT, judgmentRunId);
 await fs.promises.mkdir(outputDir, { recursive: true });
 
-const judgments = [];
-let hasFailures = false;
+const concurrency = positiveInteger(args.concurrency, 1);
+const jobs = pairs.flatMap(([left, right], pairIndex) =>
+  judgePanel.map((judge) => ({ left, right, pairIndex, judge }))
+);
 
-for (let index = 0; index < pairs.length; index += 1) {
-  const [left, right] = pairs[index];
-  for (const judge of judgePanel) {
+console.log(`Judging ${pairs.length} pair(s), ${jobs.length} judgment call(s), with concurrency ${concurrency}.`);
+const judgments = await runConcurrent(jobs, concurrency, async ({ left, right, pairIndex, judge }) => {
     try {
       const judgment = args["dry-run"]
-        ? await judgePairDry(left, right, index, outputDir, judge)
-        : await judgePairOpenRouter(left, right, index, outputDir, judge);
-      judgments.push(judgment);
+        ? await judgePairDry(left, right, pairIndex, outputDir, judge)
+        : await judgePairOpenRouter(left, right, pairIndex, outputDir, judge);
       console.log(JSON.stringify(judgment, null, 2));
+      return judgment;
     } catch (error) {
-      hasFailures = true;
       const failed = {
         status: "failed",
-        pair_index: index,
+        pair_index: pairIndex,
         a: left.model,
         b: right.model,
         judge_model: judge.model,
@@ -61,13 +61,13 @@ for (let index = 0; index < pairs.length; index += 1) {
         run_b: path.relative(ROOT, right.dir),
         error: error.message
       };
-      judgments.push(failed);
       console.log(JSON.stringify(failed, null, 2));
+      return failed;
     }
-  }
-}
+});
 
 const cleanJudgments = judgments.filter((judgment) => judgment.status !== "failed");
+const hasFailures = cleanJudgments.length !== judgments.length;
 const judgmentPath = path.join(outputDir, "pairwise.json");
 const manifestPath = path.join(outputDir, "manifest.json");
 await fs.promises.writeFile(judgmentPath, JSON.stringify(cleanJudgments, null, 2));
@@ -88,6 +88,7 @@ await fs.promises.writeFile(
     judge_panel: judgePanel,
     model_names_hidden_from_judge: judgeConfig.audit_policy.model_names_hidden_from_judge,
     pair_count: pairs.length,
+    concurrency,
     expected_judgments: pairs.length * judgePanel.length,
     completed_judgments: cleanJudgments.length,
     failed_judgments: judgments.length - cleanJudgments.length,
@@ -330,6 +331,29 @@ function parseArgs(argv) {
     }
   }
   return parsed;
+}
+
+async function runConcurrent(items, limit, worker) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+
+  async function runWorker() {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await worker(items[index], index);
+    }
+  }
+
+  const workers = Array.from({ length: Math.min(limit, items.length) }, runWorker);
+  await Promise.all(workers);
+  return results;
+}
+
+function positiveInteger(value, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+  return Math.floor(parsed);
 }
 
 function sha256(value) {
