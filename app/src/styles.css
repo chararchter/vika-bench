@@ -334,7 +334,7 @@ select {
 .leaderboard-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1080px;
+  min-width: 1160px;
 }
 
 th,
@@ -366,6 +366,46 @@ mark {
   background: #fff;
   font-size: 0.78rem;
   text-transform: uppercase;
+}
+
+.leaderboard-thumb {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  aspect-ratio: 1205 / 1448;
+  border: 1px solid #000;
+  color: #000;
+  background: #fff;
+  text-decoration: none;
+}
+
+.leaderboard-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.leaderboard-thumb span {
+  margin: 0;
+  padding: 2px;
+  font-size: 0.48rem;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.leaderboard-thumb-empty {
+  background:
+    linear-gradient(45deg, transparent 47%, #000 48%, #000 52%, transparent 53%),
+    linear-gradient(-45deg, transparent 47%, #000 48%, #000 52%, transparent 53%),
+    #fff;
+}
+
+.leaderboard-thumb-empty span {
+  border: 1px solid #000;
+  background: #fff;
 }
 
 .gallery-grid {

@@ -135,6 +135,7 @@ app.innerHTML = `
                 <th>Rank</th>
                 <th>Model</th>
                 <th>Family</th>
+                <th>Output</th>
                 <th>Status</th>
                 <th>Elo</th>
                 <th>Cost</th>
@@ -510,7 +511,7 @@ async function loadModelPlaceholders() {
     populateFamilyFilter(modelRegistry);
     renderModelPlaceholders();
   } catch (error) {
-    leaderboardRows.innerHTML = `<tr><td colspan="9">Could not load model registry.</td></tr>`;
+    leaderboardRows.innerHTML = `<tr><td colspan="10">Could not load model registry.</td></tr>`;
     modelGallery.innerHTML = `<p>${escapeHtml(error.message)}</p>`;
   }
 }
@@ -586,6 +587,7 @@ function renderModelPlaceholders() {
           <td>${index + 1}</td>
           <td><strong>${escapeHtml(prettyModelName(model.id))}</strong><span>${escapeHtml(model.id)}</span></td>
           <td>${escapeHtml(model.family)}</td>
+          <td>${renderLeaderboardThumbnail(model, result)}</td>
           <td><mark>${escapeHtml(result?.status || "Pending")}</mark></td>
           <td>${formatValue(result?.elo)}</td>
           <td>${formatCost(result?.cost_usd)}</td>
@@ -601,7 +603,7 @@ function renderModelPlaceholders() {
     .map((model) => {
       const result = modelResults.get(model.id);
       return `
-        <article class="model-card">
+        <article class="model-card" id="${escapeHtml(galleryAnchorId(model.id))}">
           ${renderModelOutput(model, result)}
           <div class="model-card-copy">
             <p class="date">${escapeHtml(result?.status ? `${result.status} result` : "Pending result")}</p>
@@ -650,6 +652,25 @@ function renderModelOutput(model, result) {
   }
 
   return `<div class="output-placeholder"><span>${escapeHtml(model.family)}</span></div>`;
+}
+
+function renderLeaderboardThumbnail(model, result) {
+  const href = `#${galleryAnchorId(model.id)}`;
+  const label = `View ${model.id} output in gallery`;
+
+  if (result?.final_image) {
+    return `
+      <a class="leaderboard-thumb" href="${escapeHtml(href)}" aria-label="${escapeHtml(label)}">
+        <img src="${escapeHtml(publicUrl(result.final_image))}" alt="" loading="lazy" />
+      </a>
+    `;
+  }
+
+  return `
+    <a class="leaderboard-thumb leaderboard-thumb-empty" href="${escapeHtml(href)}" aria-label="${escapeHtml(label)}">
+      <span>${escapeHtml(result?.status || model.family)}</span>
+    </a>
+  `;
 }
 
 function finishStroke(event) {
@@ -706,6 +727,10 @@ function setStatus(message) {
 
 function prettyModelName(id) {
   return id.split("/").pop().replaceAll("-", " ");
+}
+
+function galleryAnchorId(modelId) {
+  return `gallery-${modelId.replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "").toLowerCase()}`;
 }
 
 function publicUrl(path) {
