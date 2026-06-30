@@ -572,7 +572,9 @@ function populateFamilyFilter(models) {
 
 function renderModelPlaceholders() {
   const family = familyFilter.value;
-  const models = family === "all" ? modelRegistry : modelRegistry.filter((model) => model.family === family);
+  const models = sortModelsByResult(
+    family === "all" ? modelRegistry : modelRegistry.filter((model) => model.family === family)
+  );
 
   leaderboardRows.innerHTML = models
     .map((model, index) => {
@@ -611,6 +613,24 @@ function renderModelPlaceholders() {
       `;
     })
     .join("");
+}
+
+function sortModelsByResult(models) {
+  return [...models].sort((left, right) => {
+    const leftResult = modelResults.get(left.id);
+    const rightResult = modelResults.get(right.id);
+    const leftElo = Number(leftResult?.elo);
+    const rightElo = Number(rightResult?.elo);
+    const leftHasElo = Number.isFinite(leftElo);
+    const rightHasElo = Number.isFinite(rightElo);
+
+    if (leftHasElo && rightHasElo && rightElo !== leftElo) return rightElo - leftElo;
+    if (leftHasElo !== rightHasElo) return leftHasElo ? -1 : 1;
+    if ((leftResult?.status || "") !== (rightResult?.status || "")) {
+      return (leftResult?.status || "pending").localeCompare(rightResult?.status || "pending");
+    }
+    return left.id.localeCompare(right.id);
+  });
 }
 
 function renderModelOutput(model, result) {
