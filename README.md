@@ -17,7 +17,7 @@ Public site target: <https://maddiedreese.com/maddie-bench>
 
 - Paint app scaffolded.
 - Reference image locked at `1205 x 1448`.
-- Track B model registry scaffolded with 55 planned OpenRouter models.
+- Track B model registry scaffolded with 53 planned OpenRouter models.
 - Benchmark docs, benchmark card, runbook, and deployment notes are in place.
 - Audit metadata tracking is implemented in the runner.
 - Pairwise Elo calculator is implemented.
@@ -33,6 +33,7 @@ npm run dev
 npm run build
 npm run build:site
 npm run validate:registry
+npm run validate:openrouter
 npm run render:sample
 npm run validate:audit -- --run-id audit-smoke
 npm run judge -- --run-id audit-smoke --dry-run --judgment-run-id judge-smoke

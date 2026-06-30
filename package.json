@@ -18,7 +18,8 @@
     "sync:public-data": "node runner/sync-public-data.mjs",
     "setup": "npm install && npm run install:app",
     "validate:audit": "node runner/validate-audit.mjs",
-    "validate:registry": "node runner/validate-registry.mjs"
+    "validate:registry": "node runner/validate-registry.mjs",
+    "validate:openrouter": "node runner/validate-registry.mjs --openrouter"
   },
   "dependencies": {
     "sharp": "^0.34.0"

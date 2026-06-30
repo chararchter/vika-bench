@@ -11,6 +11,7 @@ npm run setup
 npm run run:track-b -- --check-env
 npm run judge -- --check-env
 npm run validate:registry
+npm run validate:openrouter
 npm run sync:public-data
 ```
 

@@ -65,8 +65,6 @@
 
     { "id": "sakana/fugu-ultra", "provider": "openrouter", "family": "Sakana", "status": "planned" },
     { "id": "minimax/minimax-m3", "provider": "openrouter", "family": "MiniMax", "status": "planned" },
-    { "id": "rekaai/reka-edge", "provider": "openrouter", "family": "Reka", "status": "planned" },
-    { "id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning", "provider": "openrouter", "family": "NVIDIA", "status": "planned" },
-    { "id": "nvidia/nemotron-nano-12b-v2-vl", "provider": "openrouter", "family": "NVIDIA", "status": "planned" }
+    { "id": "rekaai/reka-edge", "provider": "openrouter", "family": "Reka", "status": "planned" }
   ]
 }
