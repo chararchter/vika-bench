@@ -30,7 +30,7 @@ Required JSON shape:
 }
 ```
 
-Use many layered strokes to approximate:
+Use a concise set of strokes to approximate:
 
 - surprised facial expression
 - large eyes
@@ -42,10 +42,12 @@ Use many layered strokes to approximate:
 
 Rules:
 
+- Use no more than 80 stroke commands.
+- Use 2 to 8 points per stroke.
 - Do not write text on the canvas.
 - Do not use commands other than `stroke`.
 - Keep coordinates within the canvas.
 - Use valid hex colors and numeric coordinates.
-- Use enough layered strokes to capture the main composition, facial features, hands, hair, and background.
+- Use enough strokes to capture the main composition, facial features, hands, hair, and background without exhausting the token limit.
 - Do not include explanations, captions, comments, trailing prose, or Markdown fences.
 - Prefer broad composition first, then facial details, then texture.

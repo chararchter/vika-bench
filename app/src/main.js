@@ -219,7 +219,11 @@ Return only a JSON object with one key: "commands". Do not return Markdown.
 
 Each command must be a stroke with type, color, size, opacity, and points.
 
-Use enough layered strokes to capture the main composition, facial features, hands, hair, and background.</code></pre>
+Use no more than 80 stroke commands.
+
+Use 2 to 8 points per stroke.
+
+Use enough strokes to capture the main composition, facial features, hands, hair, and background without exhausting the token limit.</code></pre>
       </div>
       <div class="settings-grid" aria-label="Official run settings">
         <article>

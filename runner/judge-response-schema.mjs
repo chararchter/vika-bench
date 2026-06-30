@@ -6,13 +6,10 @@ export const judgeResponseSchema = {
       enum: ["a", "b", "tie"]
     },
     confidence: {
-      type: "number",
-      minimum: 0,
-      maximum: 1
+      type: "number"
     },
     rationale: {
-      type: "string",
-      maxLength: 600
+      type: "string"
     }
   },
   required: ["winner", "confidence", "rationale"],

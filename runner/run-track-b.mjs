@@ -13,6 +13,8 @@ const PROMPT_PATH = path.join(ROOT, "prompts/track-b-v0.1.md");
 const REFERENCE_PATH = path.join(ROOT, "app/public/reference/maddie-target.jpg");
 const RESULTS_ROOT = path.join(ROOT, "results");
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
+let openRouterModelParameters = null;
 
 loadEnvFile(path.join(ROOT, ".env"));
 
@@ -161,7 +163,8 @@ async function runOpenRouterModel(model, runIdValue) {
       wall_time_seconds: wallTimeSeconds,
       usage: raw.usage || null,
       openrouter_generation_id: raw.id || null,
-      resolved_model: raw.model || null
+      resolved_model: raw.model || null,
+      request_body_settings: extractRequestSettings(requestBody)
     }
   });
 
@@ -175,7 +178,8 @@ async function runOpenRouterModel(model, runIdValue) {
 
 async function buildRequestBody(modelId) {
   const dataUrl = await encodeReferenceImage();
-  return {
+  const supported = await getSupportedParameters(modelId);
+  const body = {
     model: modelId,
     messages: [
       {
@@ -198,21 +202,37 @@ async function buildRequestBody(modelId) {
         ]
       }
     ],
-    response_format: {
+    provider: {
+      require_parameters: true
+    }
+  };
+
+  if (supportsParameter(supported, "response_format") || supportsParameter(supported, "structured_outputs")) {
+    body.response_format = {
       type: "json_schema",
       json_schema: {
         name: "maddie_bench_track_b_commands",
         strict: true,
         schema: commandResponseSchema
       }
-    },
-    provider: {
-      require_parameters: true
-    },
-    temperature: Number(args.temperature ?? runConfig.request_settings.temperature),
-    max_tokens: Number(args["max-tokens"] ?? runConfig.request_settings.max_tokens),
-    stream: runConfig.request_settings.stream
-  };
+    };
+  }
+
+  if (supportsParameter(supported, "temperature")) {
+    body.temperature = Number(args.temperature ?? runConfig.request_settings.temperature);
+  }
+
+  if (supportsParameter(supported, "max_tokens")) {
+    body.max_tokens = Number(args["max-tokens"] ?? runConfig.request_settings.max_tokens);
+  } else if (supportsParameter(supported, "max_completion_tokens")) {
+    body.max_completion_tokens = Number(args["max-tokens"] ?? runConfig.request_settings.max_tokens);
+  }
+
+  if (runConfig.request_settings.stream) {
+    body.stream = runConfig.request_settings.stream;
+  }
+
+  return body;
 }
 
 async function writeRunArtifacts({ outputDir, model, commands, metadata }) {
@@ -238,11 +258,11 @@ async function writeRunArtifacts({ outputDir, model, commands, metadata }) {
     official_attempts_per_model: runConfig.official_attempts_per_model,
     runner_concurrency: concurrency,
     request_settings: {
-      temperature: Number(args.temperature ?? runConfig.request_settings.temperature),
-      max_tokens: Number(args["max-tokens"] ?? runConfig.request_settings.max_tokens),
-      response_format: runConfig.request_settings.response_format,
+      temperature: metadata.request_body_settings?.temperature ?? null,
+      max_tokens: metadata.request_body_settings?.max_tokens ?? metadata.request_body_settings?.max_completion_tokens ?? null,
+      response_format: metadata.request_body_settings?.response_format ?? null,
       require_parameters: runConfig.request_settings.require_parameters,
-      stream: runConfig.request_settings.stream
+      stream: metadata.request_body_settings?.stream ?? false
     },
     renderer: runConfig.renderer,
     artifacts: runConfig.artifacts,
@@ -406,6 +426,39 @@ function redactRequest(requestBody) {
       };
     })
   };
+}
+
+function extractRequestSettings(requestBody) {
+  return {
+    temperature: requestBody.temperature ?? null,
+    max_tokens: requestBody.max_tokens ?? null,
+    max_completion_tokens: requestBody.max_completion_tokens ?? null,
+    response_format: requestBody.response_format?.type ?? null,
+    stream: requestBody.stream ?? false
+  };
+}
+
+async function getSupportedParameters(modelId) {
+  if (!openRouterModelParameters) {
+    openRouterModelParameters = fetchOpenRouterModelParameters();
+  }
+  const parametersById = await openRouterModelParameters;
+  return parametersById.get(modelId) || null;
+}
+
+async function fetchOpenRouterModelParameters() {
+  try {
+    const response = await fetch(OPENROUTER_MODELS_URL);
+    if (!response.ok) return new Map();
+    const payload = await response.json();
+    return new Map((payload.data || []).map((model) => [model.id, model.supported_parameters || []]));
+  } catch {
+    return new Map();
+  }
+}
+
+function supportsParameter(supported, parameter) {
+  return !supported || supported.includes(parameter);
 }
 
 function parseArgs(argv) {

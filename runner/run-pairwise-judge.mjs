@@ -11,6 +11,8 @@ const JUDGE_CONFIG_PATH = path.join(ROOT, "runner/judge-config.json");
 const JUDGE_PROMPT_PATH = path.join(ROOT, "prompts/judge-pairwise-v0.1.md");
 const REFERENCE_PATH = path.join(ROOT, "app/public/reference/maddie-target.jpg");
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
+let openRouterModelParameters = null;
 
 loadEnvFile(path.join(ROOT, ".env"));
 
@@ -146,8 +148,9 @@ async function buildJudgeRequest(left, right, judge) {
   const referenceUrl = await fileToDataUrl(REFERENCE_PATH, "image/jpeg");
   const imageAUrl = await fileToDataUrl(path.join(left.dir, "final.png"), "image/png");
   const imageBUrl = await fileToDataUrl(path.join(right.dir, "final.png"), "image/png");
+  const supported = await getSupportedParameters(judge.model);
 
-  return {
+  const body = {
     model: judge.model,
     messages: [
       {
@@ -167,21 +170,33 @@ async function buildJudgeRequest(left, right, judge) {
         ]
       }
     ],
-    response_format: {
+    provider: {
+      require_parameters: true
+    }
+  };
+
+  if (supportsParameter(supported, "response_format") || supportsParameter(supported, "structured_outputs")) {
+    body.response_format = {
       type: "json_schema",
       json_schema: {
         name: "maddie_bench_pairwise_judgment",
         strict: true,
         schema: judgeResponseSchema
       }
-    },
-    provider: {
-      require_parameters: true
-    },
-    temperature: 0,
-    max_tokens: 800,
-    stream: false
-  };
+    };
+  }
+
+  if (supportsParameter(supported, "temperature")) {
+    body.temperature = 0;
+  }
+
+  if (supportsParameter(supported, "max_tokens")) {
+    body.max_tokens = 800;
+  } else if (supportsParameter(supported, "max_completion_tokens")) {
+    body.max_completion_tokens = 800;
+  }
+
+  return body;
 }
 
 function normalizeJudgeResult(parsed, left, right, index, wallTimeSeconds, usage, judge) {
@@ -331,6 +346,29 @@ function parseArgs(argv) {
     }
   }
   return parsed;
+}
+
+async function getSupportedParameters(modelId) {
+  if (!openRouterModelParameters) {
+    openRouterModelParameters = fetchOpenRouterModelParameters();
+  }
+  const parametersById = await openRouterModelParameters;
+  return parametersById.get(modelId) || null;
+}
+
+async function fetchOpenRouterModelParameters() {
+  try {
+    const response = await fetch(OPENROUTER_MODELS_URL);
+    if (!response.ok) return new Map();
+    const payload = await response.json();
+    return new Map((payload.data || []).map((model) => [model.id, model.supported_parameters || []]));
+  } catch {
+    return new Map();
+  }
+}
+
+function supportsParameter(supported, parameter) {
+  return !supported || supported.includes(parameter);
 }
 
 async function runConcurrent(items, limit, worker) {
