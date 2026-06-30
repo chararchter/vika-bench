@@ -16,6 +16,14 @@ const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
 let openRouterModelParameters = null;
 
+class ProviderError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "ProviderError";
+    this.retryable = true;
+  }
+}
+
 loadEnvFile(path.join(ROOT, ".env"));
 
 const args = parseArgs(process.argv.slice(2));
@@ -64,23 +72,57 @@ if (hasFailures) {
 }
 
 async function runModelSafely(model, runIdValue) {
-  try {
-    return args["dry-run"]
-      ? await runDryModel(model, runIdValue)
-      : await runOpenRouterModel(model, runIdValue);
-  } catch (error) {
-    const outputDir = resultDir(model.id, runIdValue);
-    await writeMetadata(outputDir, model, {
-      status: "failed",
-      completed_at: new Date().toISOString(),
-      error: error.message
-    });
-    return {
-      model: model.id,
-      status: "failed",
-      error: error.message,
-      outputDir
-    };
+  if (args["dry-run"]) {
+    return await runDryModel(model, runIdValue);
+  }
+
+  const maxProviderRetries = positiveInteger(args["provider-retries"] ?? runConfig.provider_retry_attempts, 0);
+  const providerAttempts = [];
+
+  for (let attempt = 1; attempt <= maxProviderRetries + 1; attempt += 1) {
+    try {
+      const result = await runOpenRouterModel(model, runIdValue, { attempt, providerAttempts });
+      if (providerAttempts.length > 0) {
+        result.providerRetries = providerAttempts.length;
+      }
+      return result;
+    } catch (error) {
+      const isProviderError = error.retryable === true;
+      const attemptRecord = {
+        attempt,
+        completed_at: new Date().toISOString(),
+        status: isProviderError ? "api_error" : "failed",
+        error: error.message
+      };
+
+      if (isProviderError) {
+        providerAttempts.push(attemptRecord);
+        await writeRetryLog(resultDir(model.id, runIdValue), providerAttempts);
+      }
+
+      if (isProviderError && attempt <= maxProviderRetries) {
+        await sleep(1000 * attempt);
+        continue;
+      }
+
+      const outputDir = resultDir(model.id, runIdValue);
+      await writeMetadata(outputDir, model, {
+        status: isProviderError ? "api_error" : "failed",
+        completed_at: new Date().toISOString(),
+        error: error.message,
+        provider_retry_policy: {
+          retry_provider_errors: true,
+          max_provider_retries: maxProviderRetries
+        },
+        provider_attempts: isProviderError ? providerAttempts : undefined
+      });
+      return {
+        model: model.id,
+        status: isProviderError ? "api_error" : "failed",
+        error: error.message,
+        outputDir
+      };
+    }
   }
 }
 
@@ -88,6 +130,7 @@ async function runDryModel(model, runIdValue) {
   const startedAt = new Date().toISOString();
   const outputDir = resultDir(model.id, runIdValue);
   const commands = sampleCommands();
+  const drawingBudgetMetadata = validateDrawingBudget(commands.map(normalizeCommand));
   await writeRunArtifacts({
     outputDir,
     model,
@@ -101,13 +144,14 @@ async function runDryModel(model, runIdValue) {
       cost_usd: null,
       wall_time_seconds: 0,
       usage: null,
-      openrouter_generation_id: null
+      openrouter_generation_id: null,
+      ...drawingBudgetMetadata
     }
   });
   return { model: model.id, status: "dry_run", outputDir };
 }
 
-async function runOpenRouterModel(model, runIdValue) {
+async function runOpenRouterModel(model, runIdValue, retryContext = {}) {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     throw new Error("OPENROUTER_API_KEY is required unless --dry-run is set.");
@@ -141,13 +185,27 @@ async function runOpenRouterModel(model, runIdValue) {
       started_at: startedAt,
       completed_at: new Date().toISOString(),
       http_status: response.status,
-      wall_time_seconds: wallTimeSeconds
+      wall_time_seconds: wallTimeSeconds,
+      provider_attempt: retryContext.attempt ?? 1
     });
-    throw new Error(`OpenRouter request failed for ${model.id}: ${response.status} ${rawText}`);
+    throw new ProviderError(`OpenRouter request failed for ${model.id}: ${response.status} ${rawText}`);
   }
 
   const raw = JSON.parse(rawText);
+  if (raw.error) {
+    await writeMetadata(outputDir, model, {
+      status: "api_error",
+      started_at: startedAt,
+      completed_at: new Date().toISOString(),
+      wall_time_seconds: wallTimeSeconds,
+      error: raw.error.message || JSON.stringify(raw.error),
+      provider_attempt: retryContext.attempt ?? 1
+    });
+    throw new ProviderError(`OpenRouter returned an error for ${model.id}: ${raw.error.message || JSON.stringify(raw.error)}`);
+  }
+
   const commands = extractCommands(raw).map(normalizeCommand);
+  const drawingBudgetMetadata = validateDrawingBudget(commands);
 
   await writeRunArtifacts({
     outputDir,
@@ -164,7 +222,14 @@ async function runOpenRouterModel(model, runIdValue) {
       usage: raw.usage || null,
       openrouter_generation_id: raw.id || null,
       resolved_model: raw.model || null,
-      request_body_settings: extractRequestSettings(requestBody)
+      request_body_settings: extractRequestSettings(requestBody),
+      provider_attempt: retryContext.attempt ?? 1,
+      provider_retry_policy: {
+        retry_provider_errors: true,
+        max_provider_retries: positiveInteger(args["provider-retries"] ?? runConfig.provider_retry_attempts, 0)
+      },
+      provider_attempts: retryContext.providerAttempts?.length ? retryContext.providerAttempts : undefined,
+      ...drawingBudgetMetadata
     }
   });
 
@@ -272,6 +337,7 @@ async function writeRunArtifacts({ outputDir, model, commands, metadata }) {
     renderer: runConfig.renderer,
     artifacts: runConfig.artifacts,
     command_count: commands.length,
+    drawing_budget: runConfig.drawing_budget,
     canvas: runConfig.canvas
   });
 }
@@ -330,6 +396,25 @@ function parseCommandPayload(content) {
     throw new Error("Model response must be a JSON array or an object with commands.");
   }
   return commands;
+}
+
+function validateDrawingBudget(commands) {
+  const budget = runConfig.drawing_budget || {};
+  const recommendedMaxCommands = Number(budget.recommended_max_commands || Infinity);
+  const minPoints = Number(budget.min_points_per_command || 2);
+
+  commands.forEach((command, index) => {
+    const pointCount = command.points.length;
+    if (pointCount < minPoints) {
+      throw new Error(`Command ${index} has ${pointCount} points; minimum is ${minPoints}.`);
+    }
+  });
+
+  return {
+    recommended_command_budget: Number.isFinite(recommendedMaxCommands) ? recommendedMaxCommands : null,
+    over_recommended_command_budget: Number.isFinite(recommendedMaxCommands) ? commands.length > recommendedMaxCommands : false,
+    command_budget_delta: Number.isFinite(recommendedMaxCommands) ? commands.length - recommendedMaxCommands : null
+  };
 }
 
 async function encodeReferenceImage() {
@@ -492,7 +577,7 @@ function chooseReasoningEffort(supported) {
   if (efforts.includes("none")) return "none";
   if (efforts.includes("minimal")) return "minimal";
   if (efforts.includes("low")) return "low";
-  return efforts[0];
+  return null;
 }
 
 function parseArgs(argv) {
@@ -517,6 +602,18 @@ function parseArgs(argv) {
 
 function asArray(value) {
   return Array.isArray(value) ? value : [value];
+}
+
+async function writeRetryLog(outputDir, providerAttempts) {
+  await fs.promises.mkdir(outputDir, { recursive: true });
+  await fs.promises.writeFile(
+    path.join(outputDir, "provider-attempts.json"),
+    JSON.stringify(providerAttempts, null, 2)
+  );
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function runConcurrent(items, limit, worker) {

@@ -46,7 +46,7 @@ app.innerHTML = `
       <div>
         <p class="date">Status</p>
         <h2>maddie-bench Track B v0.1</h2>
-        <p>Scaffold ready. No official runs published yet. Results are provisional until the official runbook has been completed.</p>
+        <p>Official v0.1 results are published. Outputs were generated through OpenRouter, judged blind by the configured panel, and scored with Elo.</p>
       </div>
       <div>
         <p class="date">Released</p>
@@ -62,6 +62,15 @@ app.innerHTML = `
 
     <section class="consent-banner" aria-label="Reference image consent and license">
       <p><strong>Reference image use:</strong> Maddie's profile picture is included with consent for maddie-bench evaluation only. Do not reuse it for unrelated datasets, scraping, training, or derivative benchmark tasks.</p>
+    </section>
+
+    <section class="reference-overview" aria-label="Benchmark reference image">
+      <div>
+        <p class="date">Reference</p>
+        <h2>Maddie's profile picture</h2>
+        <p>Every Track B model receives this exact image and attempts to recreate it as compact paintbrush commands on a 1205 x 1448 canvas.</p>
+      </div>
+      <img src="${PUBLIC_BASE}reference/maddie-target.jpg" alt="Maddie's profile picture benchmark reference" />
     </section>
 
     <details class="site-section methodology-section" id="methodology" open>
@@ -85,13 +94,13 @@ app.innerHTML = `
         </article>
         <article>
           <p class="date">Excluded</p>
-          <h3>Z.ai</h3>
-          <p>Z.ai vision models are excluded from Track B v0.1 because OpenRouter returned no compatible route for the official image plus structured-output request during preflight.</p>
+          <h3>Preflight exclusions</h3>
+          <p>Z.ai vision models, openai/gpt-5.5-pro, qwen/qwen3-vl-30b-a3b-thinking, and bytedance/ui-tars-1.5-7b are excluded from Track B v0.1 because their OpenRouter routes were incompatible or provider unavailable.</p>
         </article>
         <article>
           <p class="date">Failures</p>
-          <h3>No Retries</h3>
-          <p>Failed API calls, invalid JSON, schema violations, and render failures are recorded in metadata and do not receive a replacement official attempt.</p>
+          <h3>Provider Retry Policy</h3>
+          <p>Provider or OpenRouter infrastructure errors are retried and audited. Model output failures, invalid JSON, and render failures are recorded without replacement attempts.</p>
         </article>
         <article>
           <p class="date">Judge Panel</p>
@@ -195,7 +204,7 @@ app.innerHTML = `
             <h3>Commands</h3>
             <span id="commandCount">0 strokes</span>
           </div>
-          <textarea id="commandInput" spellcheck="false" placeholder='[{"type":"stroke","color":"#201b1b","size":12,"opacity":0.8,"points":[[300,300],[380,420]]}]'></textarea>
+          <textarea id="commandInput" spellcheck="false" placeholder='{"commands":[{"c":"#201b1b","w":12,"o":0.8,"p":[[300,300],[380,420]]}]}'></textarea>
           <div class="command-actions">
             <button id="loadJson">Replay</button>
             <button id="copyJson">Copy</button>
@@ -216,19 +225,25 @@ app.innerHTML = `
         <p>Recreate Maddie's profile picture using only structured paintbrush stroke commands. The final artifact is rendered by the official paint engine, not by the model directly.</p>
       </div>
       <div class="prompt-box">
-        <pre><code>You will receive a specific reference picture and must recreate it by emitting JSON drawing commands for a simple paint engine.
+        <pre><code>You will receive a specific reference picture and must recreate it by emitting compact JSON drawing commands for a simple paint engine.
 
 The canvas is exactly 1205 pixels wide and 1448 pixels tall.
 
 Return only a JSON object with one key: "commands". Do not return Markdown.
 
-Each command must be a stroke with type, color, size, opacity, and points.
+Each command must be a compact stroke object with c, w, o, and p.
 
-Use no more than 80 stroke commands.
+Prefer broad shapes over fine detail.
 
-Use 2 to 8 points per stroke.
+Aim for no more than 30 stroke commands.
 
-Use enough strokes to capture the main composition, facial features, hands, hair, and background without exhausting the token limit.</code></pre>
+Use at least 2 points per stroke.
+
+Prefer no more than 8 points per stroke.
+
+Use enough strokes to capture the main composition, facial features, hands, hair, and background without approaching the token limit.
+
+Stop immediately after the complete JSON object.</code></pre>
       </div>
       <div class="settings-grid" aria-label="Official run settings">
         <article>
@@ -238,7 +253,7 @@ Use enough strokes to capture the main composition, facial features, hands, hair
         </article>
         <article>
           <p class="date">Request</p>
-          <h3 id="requestSettings">temperature 0.2 / 12000 max tokens</h3>
+          <h3 id="requestSettings">temperature 0.2 / 8000 max tokens</h3>
           <p id="requestFormat">JSON schema response format with required provider parameters.</p>
         </article>
         <article>
@@ -271,7 +286,7 @@ Use enough strokes to capture the main composition, facial features, hands, hair
         <article>
           <p class="date">Output</p>
           <h3>JSON Commands</h3>
-          <p>Models return a JSON object containing stroke commands. The official renderer replays those commands into final.png and stores commands.json and metadata.json.</p>
+          <p>Models return a JSON object containing compact stroke commands. The official renderer replays those commands into final.png and stores commands.json and metadata.json.</p>
         </article>
         <article>
           <p class="date">Run Rules</p>
@@ -581,9 +596,7 @@ function renderModelPlaceholders() {
       const result = modelResults.get(model.id);
       return `
         <article class="model-card">
-          ${result?.final_image
-            ? `<img class="model-output" src="${escapeHtml(publicUrl(result.final_image))}" alt="${escapeHtml(model.id)} maddie-bench output" />`
-            : `<div class="output-placeholder"><span>${escapeHtml(model.family)}</span></div>`}
+          ${renderModelOutput(model, result)}
           <div class="model-card-copy">
             <p class="date">${escapeHtml(result?.status ? `${result.status} result` : "Pending result")}</p>
             <h3>${escapeHtml(prettyModelName(model.id))}</h3>
@@ -598,6 +611,18 @@ function renderModelPlaceholders() {
       `;
     })
     .join("");
+}
+
+function renderModelOutput(model, result) {
+  if (result?.final_image) {
+    return `<img class="model-output" src="${escapeHtml(publicUrl(result.final_image))}" alt="${escapeHtml(model.id)} maddie-bench output" />`;
+  }
+
+  if (result?.status) {
+    return `<div class="output-placeholder output-failed"><span>${escapeHtml(result.status)} official attempt</span></div>`;
+  }
+
+  return `<div class="output-placeholder"><span>${escapeHtml(model.family)}</span></div>`;
 }
 
 function finishStroke(event) {

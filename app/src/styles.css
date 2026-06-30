@@ -201,6 +201,28 @@ button.active {
   margin-bottom: 0;
 }
 
+.reference-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  gap: 22px;
+  align-items: start;
+  margin-top: 28px;
+  padding: 18px;
+  border: 2px solid #000;
+}
+
+.reference-overview p:last-child {
+  margin-bottom: 0;
+}
+
+.reference-overview img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1205 / 1448;
+  border: 1px solid #000;
+  object-fit: cover;
+}
+
 .site-section:not([open]) {
   padding-top: 40px;
 }
@@ -388,6 +410,16 @@ mark {
   font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
+}
+
+.output-failed {
+  background: repeating-linear-gradient(
+      0deg,
+      #fff,
+      #fff 18px,
+      #f0f0f0 18px,
+      #f0f0f0 36px
+    );
 }
 
 .model-card-copy {

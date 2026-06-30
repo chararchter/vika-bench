@@ -17,7 +17,7 @@ npm run sync:public-data
 
 ## 2. Run Models
 
-Official runs use one attempt per model and the settings in `runner/run-config.json`. All model calls are routed through OpenRouter.
+Official runs use one model-output attempt per model and the settings in `runner/run-config.json`. Provider or OpenRouter infrastructure errors are retried according to the configured provider retry policy. All model calls are routed through OpenRouter.
 
 ```bash
 npm run run:track-b -- --all --run-id official-v0.1 --concurrency 4

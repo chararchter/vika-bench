@@ -45,9 +45,13 @@ Useful options:
   "reference_sha256": "...",
   "runner_sha256": "...",
   "official_attempts_per_model": 1,
+  "provider_retry_policy": {
+    "retry_provider_errors": true,
+    "max_provider_retries": 1
+  },
   "request_settings": {
     "temperature": 0.2,
-    "max_tokens": 12000,
+    "max_tokens": 8000,
     "response_format": "json_schema",
     "require_parameters": true
   },

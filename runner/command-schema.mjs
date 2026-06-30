@@ -6,20 +6,16 @@ export const commandResponseSchema = {
       items: {
         type: "object",
         properties: {
-          type: {
-            type: "string",
-            enum: ["stroke"]
-          },
-          color: {
+          c: {
             type: "string"
           },
-          size: {
+          w: {
             type: "number"
           },
-          opacity: {
+          o: {
             type: "number"
           },
-          points: {
+          p: {
             type: "array",
             items: {
               type: "array",
@@ -29,7 +25,7 @@ export const commandResponseSchema = {
             }
           }
         },
-        required: ["type", "color", "size", "opacity", "points"],
+        required: ["c", "w", "o", "p"],
         additionalProperties: false
       }
     }

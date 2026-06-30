@@ -14,7 +14,7 @@ Recreate Maddie's profile picture on a constrained paint canvas.
 
 ## Track B
 
-Models receive Maddie's profile picture and emit structured drawing commands. The official paint engine replays those commands to produce the final image.
+Models receive Maddie's profile picture and emit compact structured drawing commands. The official paint engine replays those commands to produce the final image.
 
 ## Canvas
 
@@ -32,7 +32,8 @@ The source of truth is `runner/run-config.json`.
 
 - Model provider route: OpenRouter
 - Temperature: `0.2`
-- Max tokens: `12000`
+- Max tokens: `8000`
+- Drawing budget: `30` stroke commands recommended, not a hard failure threshold; each command must have at least `2` points, with no more than `8` points recommended
 - Response format: `json_schema`
 - Provider parameters required: `true`
 - Renderer: `runner/render-commands.mjs`
@@ -49,6 +50,12 @@ See `runner/models.track-b.json`.
 ## Exclusions
 
 Z.ai vision models are excluded from Track B v0.1 because OpenRouter returned no compatible route for the official image plus structured-output request during preflight.
+
+`openai/gpt-5.5-pro` is excluded from Track B v0.1 because the OpenRouter route repeatedly exhausted the completion budget on hidden reasoning and returned truncated JSON during compact protocol preflight.
+
+`qwen/qwen3-vl-30b-a3b-thinking` is excluded from Track B v0.1 because OpenRouter returned a provider error for the official image plus structured-output request during compact protocol preflight.
+
+`bytedance/ui-tars-1.5-7b` is excluded from Track B v0.1 because OpenRouter's upstream Parasail route repeatedly returned 429 provider rate-limit errors during official-run retries, so the route was provider unavailable.
 
 ## Planned Metrics
 
@@ -67,6 +74,8 @@ Elo is computed from blind pairwise judgments over rendered final images. The v0
 ## Accountability
 
 Official runs should keep raw model responses, parsed commands, final renders, metadata, usage/cost, prompt version, reference version, and judge decisions used for Elo.
+
+Provider or OpenRouter infrastructure errors are retried according to `runner/run-config.json` and recorded in the audit trail. Model output failures, such as invalid JSON or unrenderable strokes, are not retried.
 
 ## Rights
 

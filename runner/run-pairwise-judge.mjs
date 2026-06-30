@@ -40,11 +40,14 @@ const outputDir = path.join(JUDGMENTS_ROOT, judgmentRunId);
 await fs.promises.mkdir(outputDir, { recursive: true });
 
 const concurrency = positiveInteger(args.concurrency, 1);
-const jobs = pairs.flatMap(([left, right], pairIndex) =>
+const existingJudgments = loadExistingJudgments(args["resume-from"]);
+const existingKeys = new Set(existingJudgments.map(judgmentKey));
+const allJobs = pairs.flatMap(([left, right], pairIndex) =>
   judgePanel.map((judge) => ({ left, right, pairIndex, judge }))
 );
+const jobs = allJobs.filter((job) => !existingKeys.has(jobKey(job)));
 
-console.log(`Judging ${pairs.length} pair(s), ${jobs.length} judgment call(s), with concurrency ${concurrency}.`);
+console.log(`Judging ${pairs.length} pair(s), ${allJobs.length} total judgment call(s), ${existingJudgments.length} resumed, ${jobs.length} remaining, with concurrency ${concurrency}.`);
 const judgments = await runConcurrent(jobs, concurrency, async ({ left, right, pairIndex, judge }) => {
     try {
       const judgment = args["dry-run"]
@@ -68,8 +71,8 @@ const judgments = await runConcurrent(jobs, concurrency, async ({ left, right, p
     }
 });
 
-const cleanJudgments = judgments.filter((judgment) => judgment.status !== "failed");
-const hasFailures = cleanJudgments.length !== judgments.length;
+const cleanJudgments = existingJudgments.concat(judgments.filter((judgment) => judgment.status !== "failed"));
+const hasFailures = cleanJudgments.length !== allJobs.length;
 const judgmentPath = path.join(outputDir, "pairwise.json");
 const manifestPath = path.join(outputDir, "manifest.json");
 await fs.promises.writeFile(judgmentPath, JSON.stringify(cleanJudgments, null, 2));
@@ -91,9 +94,10 @@ await fs.promises.writeFile(
     model_names_hidden_from_judge: judgeConfig.audit_policy.model_names_hidden_from_judge,
     pair_count: pairs.length,
     concurrency,
-    expected_judgments: pairs.length * judgePanel.length,
+    expected_judgments: allJobs.length,
+    resumed_judgments: existingJudgments.length,
     completed_judgments: cleanJudgments.length,
-    failed_judgments: judgments.length - cleanJudgments.length,
+    failed_judgments: allJobs.length - cleanJudgments.length,
     judgments: path.relative(ROOT, judgmentPath)
   }, null, 2)
 );
@@ -285,6 +289,27 @@ function makePairs(items, limit) {
   return pairs;
 }
 
+function loadExistingJudgments(resumePath) {
+  if (!resumePath) return [];
+  const absolute = path.isAbsolute(resumePath) ? resumePath : path.join(ROOT, resumePath);
+  if (!fs.existsSync(absolute)) {
+    throw new Error(`Resume file not found: ${resumePath}`);
+  }
+  const parsed = JSON.parse(fs.readFileSync(absolute, "utf8"));
+  if (!Array.isArray(parsed)) {
+    throw new Error(`Resume file must be a JSON array: ${resumePath}`);
+  }
+  return parsed.filter((judgment) => judgment && judgment.status !== "failed" && judgment.judge_model !== undefined);
+}
+
+function jobKey({ pairIndex, judge }) {
+  return `${pairIndex}\t${judge.model}`;
+}
+
+function judgmentKey(judgment) {
+  return `${judgment.pair_index}\t${judgment.judge_model}`;
+}
+
 function parseJudgePayload(content) {
   const cleaned = String(content).trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
   const parsed = JSON.parse(cleaned);
@@ -396,7 +421,7 @@ function chooseReasoningEffort(supported) {
   if (efforts.includes("none")) return "none";
   if (efforts.includes("minimal")) return "minimal";
   if (efforts.includes("low")) return "low";
-  return efforts[0];
+  return null;
 }
 
 async function runConcurrent(items, limit, worker) {

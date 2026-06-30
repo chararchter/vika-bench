@@ -21,21 +21,30 @@ export function normalizeCommand(command) {
     return { type: "clear" };
   }
 
-  if (command.type !== "stroke") {
+  const normalizedInput = {
+    type: command.type || "stroke",
+    color: command.c ?? command.color,
+    size: command.w ?? command.size,
+    opacity: command.o ?? command.opacity,
+    composite: command.composite,
+    points: command.p ?? command.points
+  };
+
+  if (normalizedInput.type !== "stroke") {
     throw new Error(`Unsupported command type: ${command.type}`);
   }
 
-  if (!Array.isArray(command.points) || command.points.length < 2) {
+  if (!Array.isArray(normalizedInput.points) || normalizedInput.points.length < 2) {
     throw new Error("Stroke commands need at least two points.");
   }
 
   return {
     type: "stroke",
-    color: command.color || "#1c1717",
-    size: clamp(Number(command.size || 8), 1, 160),
-    opacity: clamp(Number(command.opacity ?? 1), 0.01, 1),
-    composite: command.composite === "destination-out" ? "destination-out" : "source-over",
-    points: command.points.map((point) => {
+    color: normalizedInput.color || "#1c1717",
+    size: clamp(Number(normalizedInput.size || 8), 1, 160),
+    opacity: clamp(Number(normalizedInput.opacity ?? 1), 0.01, 1),
+    composite: normalizedInput.composite === "destination-out" ? "destination-out" : "source-over",
+    points: normalizedInput.points.map((point) => {
       if (!Array.isArray(point) || point.length < 2) {
         throw new Error("Each point must be [x, y].");
       }

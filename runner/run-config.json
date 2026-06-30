@@ -3,6 +3,7 @@
   "track": "structured-drawing",
   "version": "0.1",
   "official_attempts_per_model": 1,
+  "provider_retry_attempts": 1,
   "prompt": {
     "path": "prompts/track-b-v0.1.md",
     "version": "track-b-v0.1"
@@ -16,9 +17,14 @@
     "height": 1448,
     "background": "#f7f3ef"
   },
+  "drawing_budget": {
+    "recommended_max_commands": 30,
+    "min_points_per_command": 2,
+    "recommended_max_points_per_command": 8
+  },
   "request_settings": {
     "temperature": 0.2,
-    "max_tokens": 12000,
+    "max_tokens": 8000,
     "reasoning_effort": "minimal",
     "exclude_reasoning": true,
     "response_format": "json_schema",
