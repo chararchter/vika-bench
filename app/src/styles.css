@@ -218,6 +218,7 @@ button.active {
 .reference-overview img {
   display: block;
   width: 100%;
+  max-width: 100%;
   aspect-ratio: 1205 / 1448;
   border: 1px solid #000;
   object-fit: cover;
@@ -753,6 +754,10 @@ footer p {
   .workspace,
   .settings-grid,
   .protocol-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reference-overview {
     grid-template-columns: 1fr;
   }
 
