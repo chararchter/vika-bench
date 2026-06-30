@@ -489,12 +489,18 @@ dd {
 
 .toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   min-width: 0;
   padding: 10px;
   border-bottom: 1px solid #000;
-  overflow-x: auto;
+  overflow: visible;
+}
+
+.toolbar > button,
+.toolbar > label {
+  flex: 0 0 auto;
 }
 
 input[type="color"] {
@@ -505,6 +511,7 @@ input[type="color"] {
 
 .range {
   min-height: 38px;
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -520,7 +527,7 @@ input[type="color"] {
 }
 
 .range input {
-  width: 100px;
+  width: clamp(76px, 14vw, 110px);
   accent-color: #000;
 }
 
