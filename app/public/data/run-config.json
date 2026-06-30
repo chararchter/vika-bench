@@ -19,6 +19,8 @@
   "request_settings": {
     "temperature": 0.2,
     "max_tokens": 12000,
+    "reasoning_effort": "minimal",
+    "exclude_reasoning": true,
     "response_format": "json_schema",
     "require_parameters": true,
     "stream": false

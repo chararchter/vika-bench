@@ -190,6 +190,8 @@ async function buildJudgeRequest(left, right, judge) {
     body.temperature = 0;
   }
 
+  addReasoningSettings(body, supported);
+
   if (supportsParameter(supported, "max_tokens")) {
     body.max_tokens = 800;
   } else if (supportsParameter(supported, "max_completion_tokens")) {
@@ -352,8 +354,8 @@ async function getSupportedParameters(modelId) {
   if (!openRouterModelParameters) {
     openRouterModelParameters = fetchOpenRouterModelParameters();
   }
-  const parametersById = await openRouterModelParameters;
-  return parametersById.get(modelId) || null;
+  const modelsById = await openRouterModelParameters;
+  return modelsById.get(modelId) || null;
 }
 
 async function fetchOpenRouterModelParameters() {
@@ -361,14 +363,40 @@ async function fetchOpenRouterModelParameters() {
     const response = await fetch(OPENROUTER_MODELS_URL);
     if (!response.ok) return new Map();
     const payload = await response.json();
-    return new Map((payload.data || []).map((model) => [model.id, model.supported_parameters || []]));
+    return new Map((payload.data || []).map((model) => [model.id, model]));
   } catch {
     return new Map();
   }
 }
 
 function supportsParameter(supported, parameter) {
-  return !supported || supported.includes(parameter);
+  return !supported || (supported.supported_parameters || []).includes(parameter);
+}
+
+function addReasoningSettings(body, supported) {
+  const effort = chooseReasoningEffort(supported);
+
+  if (supportsParameter(supported, "reasoning")) {
+    body.reasoning = {
+      effort,
+      exclude: true
+    };
+  } else if (supportsParameter(supported, "reasoning_effort")) {
+    body.reasoning_effort = effort;
+  }
+
+  if (supportsParameter(supported, "include_reasoning")) {
+    body.include_reasoning = false;
+  }
+}
+
+function chooseReasoningEffort(supported) {
+  const requested = args["reasoning-effort"] || "minimal";
+  const efforts = supported?.reasoning?.supported_efforts || [];
+  if (efforts.length === 0 || efforts.includes(requested)) return requested;
+  if (efforts.includes("minimal")) return "minimal";
+  if (efforts.includes("low")) return "low";
+  return efforts[0];
 }
 
 async function runConcurrent(items, limit, worker) {

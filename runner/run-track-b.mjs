@@ -222,6 +222,8 @@ async function buildRequestBody(modelId) {
     body.temperature = Number(args.temperature ?? runConfig.request_settings.temperature);
   }
 
+  addReasoningSettings(body, supported);
+
   if (supportsParameter(supported, "max_tokens")) {
     body.max_tokens = Number(args["max-tokens"] ?? runConfig.request_settings.max_tokens);
   } else if (supportsParameter(supported, "max_completion_tokens")) {
@@ -259,6 +261,9 @@ async function writeRunArtifacts({ outputDir, model, commands, metadata }) {
     runner_concurrency: concurrency,
     request_settings: {
       temperature: metadata.request_body_settings?.temperature ?? null,
+      reasoning: metadata.request_body_settings?.reasoning ?? null,
+      reasoning_effort: metadata.request_body_settings?.reasoning_effort ?? null,
+      include_reasoning: metadata.request_body_settings?.include_reasoning ?? null,
       max_tokens: metadata.request_body_settings?.max_tokens ?? metadata.request_body_settings?.max_completion_tokens ?? null,
       response_format: metadata.request_body_settings?.response_format ?? null,
       require_parameters: runConfig.request_settings.require_parameters,
@@ -431,6 +436,9 @@ function redactRequest(requestBody) {
 function extractRequestSettings(requestBody) {
   return {
     temperature: requestBody.temperature ?? null,
+    reasoning: requestBody.reasoning ?? null,
+    reasoning_effort: requestBody.reasoning_effort ?? null,
+    include_reasoning: requestBody.include_reasoning ?? null,
     max_tokens: requestBody.max_tokens ?? null,
     max_completion_tokens: requestBody.max_completion_tokens ?? null,
     response_format: requestBody.response_format?.type ?? null,
@@ -442,8 +450,8 @@ async function getSupportedParameters(modelId) {
   if (!openRouterModelParameters) {
     openRouterModelParameters = fetchOpenRouterModelParameters();
   }
-  const parametersById = await openRouterModelParameters;
-  return parametersById.get(modelId) || null;
+  const modelsById = await openRouterModelParameters;
+  return modelsById.get(modelId) || null;
 }
 
 async function fetchOpenRouterModelParameters() {
@@ -451,14 +459,40 @@ async function fetchOpenRouterModelParameters() {
     const response = await fetch(OPENROUTER_MODELS_URL);
     if (!response.ok) return new Map();
     const payload = await response.json();
-    return new Map((payload.data || []).map((model) => [model.id, model.supported_parameters || []]));
+    return new Map((payload.data || []).map((model) => [model.id, model]));
   } catch {
     return new Map();
   }
 }
 
 function supportsParameter(supported, parameter) {
-  return !supported || supported.includes(parameter);
+  return !supported || (supported.supported_parameters || []).includes(parameter);
+}
+
+function addReasoningSettings(body, supported) {
+  const effort = chooseReasoningEffort(supported);
+
+  if (supportsParameter(supported, "reasoning")) {
+    body.reasoning = {
+      effort,
+      exclude: runConfig.request_settings.exclude_reasoning
+    };
+  } else if (supportsParameter(supported, "reasoning_effort")) {
+    body.reasoning_effort = effort;
+  }
+
+  if (supportsParameter(supported, "include_reasoning")) {
+    body.include_reasoning = !runConfig.request_settings.exclude_reasoning;
+  }
+}
+
+function chooseReasoningEffort(supported) {
+  const requested = args["reasoning-effort"] || runConfig.request_settings.reasoning_effort || "minimal";
+  const efforts = supported?.reasoning?.supported_efforts || [];
+  if (efforts.length === 0 || efforts.includes(requested)) return requested;
+  if (efforts.includes("minimal")) return "minimal";
+  if (efforts.includes("low")) return "low";
+  return efforts[0];
 }
 
 function parseArgs(argv) {
