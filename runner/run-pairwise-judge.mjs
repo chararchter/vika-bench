@@ -377,12 +377,10 @@ function addReasoningSettings(body, supported) {
   const effort = chooseReasoningEffort(supported);
 
   if (supportsParameter(supported, "reasoning")) {
-    body.reasoning = {
-      effort,
-      exclude: true
-    };
+    body.reasoning = { exclude: true };
+    if (effort) body.reasoning.effort = effort;
   } else if (supportsParameter(supported, "reasoning_effort")) {
-    body.reasoning_effort = effort;
+    if (effort) body.reasoning_effort = effort;
   }
 
   if (supportsParameter(supported, "include_reasoning")) {
@@ -393,7 +391,9 @@ function addReasoningSettings(body, supported) {
 function chooseReasoningEffort(supported) {
   const requested = args["reasoning-effort"] || "minimal";
   const efforts = supported?.reasoning?.supported_efforts || [];
-  if (efforts.length === 0 || efforts.includes(requested)) return requested;
+  if (efforts.length === 0) return null;
+  if (efforts.includes(requested)) return requested;
+  if (efforts.includes("none")) return "none";
   if (efforts.includes("minimal")) return "minimal";
   if (efforts.includes("low")) return "low";
   return efforts[0];
