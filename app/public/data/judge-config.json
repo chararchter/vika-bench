@@ -1,0 +1,38 @@
+{
+  "benchmark": "maddie-bench",
+  "track": "structured-drawing",
+  "version": "0.1",
+  "elo_method": "panel_pairwise_elo",
+  "initial_elo": 1000,
+  "k_factor": 32,
+  "judge_panel": [
+    {
+      "label": "GPT",
+      "provider": "openrouter",
+      "model": "openai/gpt-5.5",
+      "mode": "blind_pairwise_image_preference",
+      "criterion": "Which rendered image better recreates Maddie's profile picture?"
+    },
+    {
+      "label": "Claude",
+      "provider": "openrouter",
+      "model": "anthropic/claude-opus-4.8",
+      "mode": "blind_pairwise_image_preference",
+      "criterion": "Which rendered image better recreates Maddie's profile picture?"
+    },
+    {
+      "label": "Gemini",
+      "provider": "openrouter",
+      "model": "google/gemini-3.5-flash",
+      "mode": "blind_pairwise_image_preference",
+      "criterion": "Which rendered image better recreates Maddie's profile picture?"
+    }
+  ],
+  "tie_policy": "A tie is recorded as result 0.5 for each model in Elo.",
+  "audit_policy": {
+    "model_names_hidden_from_judge": true,
+    "store_each_judgment": true,
+    "store_judge_model_and_prompt": true,
+    "human_review": "Maddie may spot-check or rerun suspicious judgments before publishing official scores."
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "benchmark": "maddie-bench",
+  "track": "structured-drawing",
+  "version": "0.1",
+  "official_attempts_per_model": 1,
+  "prompt": {
+    "path": "prompts/track-b-v0.1.md",
+    "version": "track-b-v0.1"
+  },
+  "reference_image": {
+    "path": "app/public/reference/maddie-target.jpg",
+    "label": "Maddie's profile picture"
+  },
+  "canvas": {
+    "width": 1205,
+    "height": 1448,
+    "background": "#f7f3ef"
+  },
+  "request_settings": {
+    "temperature": 0.2,
+    "max_tokens": 12000,
+    "response_format": "json_schema",
+    "require_parameters": true,
+    "stream": false
+  },
+  "renderer": {
+    "path": "runner/render-commands.mjs",
+    "engine": "sharp_svg_to_png",
+    "output": "final.png"
+  },
+  "artifacts": [
+    "request.json",
+    "raw-response.json",
+    "commands.json",
+    "final.png",
+    "metadata.json"
+  ]
+}

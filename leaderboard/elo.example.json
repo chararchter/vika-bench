@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-06-30T03:57:00.766Z",
+  "k_factor": 32,
+  "judgments": 2,
+  "leaderboard": [
+    {
+      "model": "openai/gpt-5.5",
+      "elo": 1016,
+      "comparisons": 1
+    },
+    {
+      "model": "google/gemini-3.5-flash",
+      "elo": 1000,
+      "comparisons": 1
+    },
+    {
+      "model": "openai/gpt-5.4-mini",
+      "elo": 1000,
+      "comparisons": 1
+    },
+    {
+      "model": "anthropic/claude-sonnet-4.6",
+      "elo": 984,
+      "comparisons": 1
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+.env
+.env.local
+node_modules/
+app/node_modules/
+app/dist/
+work/
+results/_summaries/
+results/**/*
+!results/README.md
+!results/**/
+!results/**/.gitkeep
+results/**/raw-response.json
+results/**/request.json
+judgments/*/
+leaderboard/elo.*.json
+!leaderboard/elo.example.json

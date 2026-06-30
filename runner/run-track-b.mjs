@@ -1,0 +1,470 @@
+import fs from "node:fs";
+import path from "node:path";
+import crypto from "node:crypto";
+import { performance } from "node:perf_hooks";
+import { commandResponseSchema } from "./command-schema.mjs";
+import { renderCommandsToPng } from "./render-commands.mjs";
+import { normalizeCommand } from "../app/src/drawing-engine.js";
+
+const ROOT = path.resolve(new URL("..", import.meta.url).pathname);
+const REGISTRY_PATH = path.join(ROOT, "runner/models.track-b.json");
+const RUN_CONFIG_PATH = path.join(ROOT, "runner/run-config.json");
+const PROMPT_PATH = path.join(ROOT, "prompts/track-b-v0.1.md");
+const REFERENCE_PATH = path.join(ROOT, "app/public/reference/maddie-target.jpg");
+const RESULTS_ROOT = path.join(ROOT, "results");
+const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+
+loadEnvFile(path.join(ROOT, ".env"));
+
+const args = parseArgs(process.argv.slice(2));
+const registry = JSON.parse(await fs.promises.readFile(REGISTRY_PATH, "utf8"));
+const runConfig = JSON.parse(await fs.promises.readFile(RUN_CONFIG_PATH, "utf8"));
+const prompt = await fs.promises.readFile(PROMPT_PATH, "utf8");
+const promptSha256 = sha256(prompt);
+const referenceSha256 = await sha256File(REFERENCE_PATH);
+const runnerSha256 = await sha256File(new URL(import.meta.url));
+const runConfigSha256 = await sha256File(RUN_CONFIG_PATH);
+
+if (args["check-env"]) {
+  console.log(process.env.OPENROUTER_API_KEY ? "OPENROUTER_API_KEY is set" : "OPENROUTER_API_KEY is missing");
+  process.exit(process.env.OPENROUTER_API_KEY ? 0 : 1);
+}
+
+if (args.list) {
+  for (const model of registry.models) {
+    console.log(`${model.id}\t${model.family}\t${model.status}`);
+  }
+  process.exit(0);
+}
+
+const selectedModels = selectModels(registry.models, args);
+if (selectedModels.length === 0) {
+  throw new Error("No models selected. Use --model <id>, --family <name>, --all, or --list.");
+}
+
+const runId = args["run-id"] || new Date().toISOString().replaceAll(":", "-").replace(/\.\d+Z$/, "Z");
+const results = [];
+let hasFailures = false;
+
+for (const model of selectedModels) {
+  const result = await runModelSafely(model, runId);
+  if (result.status === "failed" || result.status === "api_error") {
+    hasFailures = true;
+  }
+  results.push(result);
+  console.log(JSON.stringify(result, null, 2));
+}
+
+const summaryPath = path.join(RESULTS_ROOT, `_summaries`, `${runId}.json`);
+await fs.promises.mkdir(path.dirname(summaryPath), { recursive: true });
+await fs.promises.writeFile(summaryPath, JSON.stringify({ runId, results }, null, 2));
+if (hasFailures) {
+  process.exitCode = 1;
+}
+
+async function runModelSafely(model, runIdValue) {
+  try {
+    return args["dry-run"]
+      ? await runDryModel(model, runIdValue)
+      : await runOpenRouterModel(model, runIdValue);
+  } catch (error) {
+    const outputDir = resultDir(model.id, runIdValue);
+    await writeMetadata(outputDir, model, {
+      status: "failed",
+      completed_at: new Date().toISOString(),
+      error: error.message
+    });
+    return {
+      model: model.id,
+      status: "failed",
+      error: error.message,
+      outputDir
+    };
+  }
+}
+
+async function runDryModel(model, runIdValue) {
+  const startedAt = new Date().toISOString();
+  const outputDir = resultDir(model.id, runIdValue);
+  const commands = sampleCommands();
+  await writeRunArtifacts({
+    outputDir,
+    model,
+    commands,
+    metadata: {
+      status: "dry_run",
+      started_at: startedAt,
+      completed_at: new Date().toISOString(),
+      raw_response_path: null,
+      request_path: null,
+      cost_usd: null,
+      wall_time_seconds: 0,
+      usage: null,
+      openrouter_generation_id: null
+    }
+  });
+  return { model: model.id, status: "dry_run", outputDir };
+}
+
+async function runOpenRouterModel(model, runIdValue) {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENROUTER_API_KEY is required unless --dry-run is set.");
+  }
+
+  const startedAt = new Date().toISOString();
+  const outputDir = resultDir(model.id, runIdValue);
+  await fs.promises.mkdir(outputDir, { recursive: true });
+
+  const requestBody = await buildRequestBody(model.id);
+  await fs.promises.writeFile(path.join(outputDir, "request.json"), JSON.stringify(redactRequest(requestBody), null, 2));
+
+  const start = performance.now();
+  const response = await fetch(OPENROUTER_URL, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": "https://github.com/maddiedreese/maddie-bench",
+      "X-Title": "maddie-bench"
+    },
+    body: JSON.stringify(requestBody)
+  });
+  const wallTimeSeconds = (performance.now() - start) / 1000;
+  const rawText = await response.text();
+  await fs.promises.writeFile(path.join(outputDir, "raw-response.json"), rawText);
+
+  if (!response.ok) {
+    await writeMetadata(outputDir, model, {
+      status: "api_error",
+      started_at: startedAt,
+      completed_at: new Date().toISOString(),
+      http_status: response.status,
+      wall_time_seconds: wallTimeSeconds
+    });
+    throw new Error(`OpenRouter request failed for ${model.id}: ${response.status} ${rawText}`);
+  }
+
+  const raw = JSON.parse(rawText);
+  const commands = extractCommands(raw).map(normalizeCommand);
+
+  await writeRunArtifacts({
+    outputDir,
+    model,
+    commands,
+    metadata: {
+      status: "completed",
+      started_at: startedAt,
+      completed_at: new Date().toISOString(),
+      raw_response_path: "raw-response.json",
+      request_path: "request.json",
+      cost_usd: extractCostUsd(raw),
+      wall_time_seconds: wallTimeSeconds,
+      usage: raw.usage || null,
+      openrouter_generation_id: raw.id || null,
+      resolved_model: raw.model || null
+    }
+  });
+
+  return {
+    model: model.id,
+    status: "completed",
+    commandCount: commands.length,
+    outputDir
+  };
+}
+
+async function buildRequestBody(modelId) {
+  const dataUrl = await encodeReferenceImage();
+  return {
+    model: modelId,
+    messages: [
+      {
+        role: "system",
+        content: "You are a careful visual artist. Return valid JSON only."
+      },
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: `${prompt}\n\nReturn a JSON object with a single key named commands.`
+          },
+          {
+            type: "image_url",
+            image_url: {
+              url: dataUrl
+            }
+          }
+        ]
+      }
+    ],
+    response_format: {
+      type: "json_schema",
+      json_schema: {
+        name: "maddie_bench_track_b_commands",
+        strict: true,
+        schema: commandResponseSchema
+      }
+    },
+    provider: {
+      require_parameters: true
+    },
+    temperature: Number(args.temperature ?? runConfig.request_settings.temperature),
+    max_tokens: Number(args["max-tokens"] ?? runConfig.request_settings.max_tokens),
+    stream: runConfig.request_settings.stream
+  };
+}
+
+async function writeRunArtifacts({ outputDir, model, commands, metadata }) {
+  await fs.promises.mkdir(outputDir, { recursive: true });
+  await fs.promises.writeFile(path.join(outputDir, "commands.json"), JSON.stringify(commands, null, 2));
+  await renderCommandsToPng(commands, path.join(outputDir, "final.png"));
+  await writeMetadata(outputDir, model, {
+    ...metadata,
+    benchmark: "maddie-bench",
+    track: "structured-drawing",
+    version: "0.1",
+    model: model.id,
+    provider: model.provider,
+    family: model.family,
+    prompt: path.relative(ROOT, PROMPT_PATH),
+    reference_image: path.relative(ROOT, REFERENCE_PATH),
+    prompt_version: "track-b-v0.1",
+    prompt_sha256: promptSha256,
+    reference_sha256: referenceSha256,
+    runner_sha256: runnerSha256,
+    run_config: path.relative(ROOT, RUN_CONFIG_PATH),
+    run_config_sha256: runConfigSha256,
+    official_attempts_per_model: runConfig.official_attempts_per_model,
+    request_settings: {
+      temperature: Number(args.temperature ?? runConfig.request_settings.temperature),
+      max_tokens: Number(args["max-tokens"] ?? runConfig.request_settings.max_tokens),
+      response_format: runConfig.request_settings.response_format,
+      require_parameters: runConfig.request_settings.require_parameters,
+      stream: runConfig.request_settings.stream
+    },
+    renderer: runConfig.renderer,
+    artifacts: runConfig.artifacts,
+    command_count: commands.length,
+    canvas: runConfig.canvas
+  });
+}
+
+async function writeMetadata(outputDir, model, metadata) {
+  await fs.promises.mkdir(outputDir, { recursive: true });
+  await fs.promises.writeFile(
+    path.join(outputDir, "metadata.json"),
+    JSON.stringify({
+      benchmark: "maddie-bench",
+      track: "structured-drawing",
+      version: "0.1",
+      model: model.id,
+      provider: model.provider,
+      family: model.family,
+      prompt: path.relative(ROOT, PROMPT_PATH),
+      reference_image: path.relative(ROOT, REFERENCE_PATH),
+      prompt_version: "track-b-v0.1",
+      prompt_sha256: promptSha256,
+      reference_sha256: referenceSha256,
+      runner_sha256: runnerSha256,
+      run_config: path.relative(ROOT, RUN_CONFIG_PATH),
+      run_config_sha256: runConfigSha256,
+      official_attempts_per_model: runConfig.official_attempts_per_model,
+      ...metadata
+    }, null, 2)
+  );
+}
+
+function extractCommands(raw) {
+  const message = raw?.choices?.[0]?.message;
+  const toolCallArgs = message?.tool_calls?.[0]?.function?.arguments;
+  const content = toolCallArgs || message?.content;
+
+  if (Array.isArray(content)) {
+    const textPart = content.find((part) => part.type === "text" && part.text);
+    return parseCommandPayload(textPart?.text || "");
+  }
+
+  return parseCommandPayload(content || "");
+}
+
+function extractCostUsd(raw) {
+  return raw?.usage?.cost ?? raw?.usage?.total_cost ?? raw?.usage?.total_cost_usd ?? null;
+}
+
+function parseCommandPayload(content) {
+  if (typeof content !== "string") {
+    throw new Error("Model response did not include text content.");
+  }
+
+  const cleaned = content.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+  const parsed = JSON.parse(cleaned);
+  const commands = Array.isArray(parsed) ? parsed : parsed.commands;
+  if (!Array.isArray(commands)) {
+    throw new Error("Model response must be a JSON array or an object with commands.");
+  }
+  return commands;
+}
+
+async function encodeReferenceImage() {
+  const image = await fs.promises.readFile(REFERENCE_PATH);
+  return `data:image/jpeg;base64,${image.toString("base64")}`;
+}
+
+function selectModels(models, parsedArgs) {
+  let selected = models;
+
+  if (parsedArgs.model) {
+    const ids = asArray(parsedArgs.model);
+    selected = models.filter((model) => ids.includes(model.id));
+  } else if (parsedArgs.family) {
+    const families = asArray(parsedArgs.family).map((family) => family.toLowerCase());
+    selected = models.filter((model) => families.includes(model.family.toLowerCase()));
+  } else if (!parsedArgs.all) {
+    selected = [];
+  }
+
+  if (parsedArgs.limit) {
+    selected = selected.slice(0, Number(parsedArgs.limit));
+  }
+
+  return selected;
+}
+
+function resultDir(modelId, runIdValue) {
+  return path.join(RESULTS_ROOT, sanitizeModelId(modelId), runIdValue);
+}
+
+function sanitizeModelId(id) {
+  return id.replaceAll("/", "__").replaceAll(":", "_");
+}
+
+function sampleCommands() {
+  return [
+    {
+      type: "stroke",
+      color: "#2a2423",
+      size: 68,
+      opacity: 0.9,
+      points: [[260, 360], [420, 245], [620, 250], [820, 340], [930, 580]]
+    },
+    {
+      type: "stroke",
+      color: "#5f5652",
+      size: 18,
+      opacity: 0.62,
+      points: [[365, 560], [420, 520], [475, 570]]
+    },
+    {
+      type: "stroke",
+      color: "#5f5652",
+      size: 18,
+      opacity: 0.62,
+      points: [[730, 570], [785, 520], [840, 565]]
+    },
+    {
+      type: "stroke",
+      color: "#1d1919",
+      size: 54,
+      opacity: 0.86,
+      points: [[520, 780], [610, 825], [690, 780]]
+    },
+    {
+      type: "stroke",
+      color: "#776e69",
+      size: 42,
+      opacity: 0.5,
+      points: [[390, 720], [350, 880], [390, 1100], [500, 1320]]
+    },
+    {
+      type: "stroke",
+      color: "#776e69",
+      size: 42,
+      opacity: 0.5,
+      points: [[830, 720], [875, 890], [835, 1110], [705, 1320]]
+    }
+  ];
+}
+
+function redactRequest(requestBody) {
+  return {
+    ...requestBody,
+    messages: requestBody.messages.map((message) => {
+      if (!Array.isArray(message.content)) return message;
+      return {
+        ...message,
+        content: message.content.map((part) => {
+          if (part.type !== "image_url") return part;
+          return {
+            ...part,
+            image_url: {
+              url: "[base64 reference image omitted]"
+            }
+          };
+        })
+      };
+    })
+  };
+}
+
+function parseArgs(argv) {
+  const parsed = {};
+  for (let index = 0; index < argv.length; index += 1) {
+    const item = argv[index];
+    if (!item.startsWith("--")) continue;
+    const key = item.slice(2);
+    const next = argv[index + 1];
+    if (!next || next.startsWith("--")) {
+      parsed[key] = true;
+    } else if (parsed[key]) {
+      parsed[key] = asArray(parsed[key]).concat(next);
+      index += 1;
+    } else {
+      parsed[key] = next;
+      index += 1;
+    }
+  }
+  return parsed;
+}
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [value];
+}
+
+function sha256(value) {
+  return crypto.createHash("sha256").update(value).digest("hex");
+}
+
+async function sha256File(filePathOrUrl) {
+  return sha256(await fs.promises.readFile(filePathOrUrl));
+}
+
+function loadEnvFile(envPath) {
+  if (!fs.existsSync(envPath)) return;
+
+  const lines = fs.readFileSync(envPath, "utf8").split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+
+    const equalsIndex = trimmed.indexOf("=");
+    if (equalsIndex === -1) continue;
+
+    const key = trimmed.slice(0, equalsIndex).trim();
+    const rawValue = trimmed.slice(equalsIndex + 1).trim();
+
+    if (!key || process.env[key] !== undefined) continue;
+    process.env[key] = unquoteEnvValue(rawValue);
+  }
+}
+
+function unquoteEnvValue(value) {
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    return value.slice(1, -1);
+  }
+  return value;
+}

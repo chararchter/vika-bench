@@ -1,0 +1,27 @@
+{
+  "name": "maddie-bench",
+  "version": "0.1.0",
+  "private": true,
+  "description": "maddie-bench Track B scaffold: structured drawing benchmark for AI models.",
+  "homepage": "https://maddiedreese.com/maddie-bench/",
+  "scripts": {
+    "dev": "npm --prefix app run dev",
+    "build": "npm --prefix app run build",
+    "build:site": "BASE_PATH=/maddie-bench/ npm --prefix app run build",
+    "elo": "node runner/calculate-elo.mjs",
+    "install:app": "npm --prefix app install",
+    "judge": "node runner/run-pairwise-judge.mjs",
+    "publish:results": "node runner/publish-results.mjs",
+    "render:sample": "node runner/render-commands.mjs --input runner/sample-commands.json --output work/sample-render.png",
+    "run:track-b": "node runner/run-track-b.mjs",
+    "scaffold:results": "node runner/scaffold-results.mjs",
+    "sync:public-data": "node runner/sync-public-data.mjs",
+    "setup": "npm install && npm run install:app",
+    "validate:audit": "node runner/validate-audit.mjs",
+    "validate:registry": "node runner/validate-registry.mjs"
+  },
+  "dependencies": {
+    "sharp": "^0.34.0"
+  },
+  "license": "UNLICENSED"
+}

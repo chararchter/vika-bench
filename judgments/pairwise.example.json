@@ -1,0 +1,15 @@
+[
+  {
+    "winner": "openai/gpt-5.5",
+    "loser": "anthropic/claude-sonnet-4.6",
+    "judge": "example",
+    "criterion": "which image better resembles Maddie's profile picture"
+  },
+  {
+    "a": "openai/gpt-5.4-mini",
+    "b": "google/gemini-3.5-flash",
+    "result": 0.5,
+    "judge": "example",
+    "criterion": "tie"
+  }
+]
