@@ -3,6 +3,13 @@
   "track": "structured-drawing",
   "version": "0.1",
   "inclusion_rule": "Model must support image input plus tool calling, JSON mode, or structured outputs.",
+  "exclusions": [
+    {
+      "family": "Z.ai",
+      "models": ["z-ai/glm-5v-turbo", "z-ai/glm-4.6v", "z-ai/glm-4.5v"],
+      "reason": "Excluded from Track B v0.1 because OpenRouter returned no compatible route for the official image plus structured-output request during preflight."
+    }
+  ],
   "models": [
     { "id": "openai/gpt-5.5-pro", "provider": "openrouter", "family": "OpenAI", "status": "planned" },
     { "id": "openai/gpt-5.5", "provider": "openrouter", "family": "OpenAI", "status": "planned" },
@@ -53,10 +60,6 @@
     { "id": "moonshotai/kimi-k2.7-code", "provider": "openrouter", "family": "Moonshot", "status": "planned" },
     { "id": "moonshotai/kimi-k2.6", "provider": "openrouter", "family": "Moonshot", "status": "planned" },
     { "id": "moonshotai/kimi-k2.5", "provider": "openrouter", "family": "Moonshot", "status": "planned" },
-
-    { "id": "z-ai/glm-5v-turbo", "provider": "openrouter", "family": "Z.ai", "status": "planned" },
-    { "id": "z-ai/glm-4.6v", "provider": "openrouter", "family": "Z.ai", "status": "planned" },
-    { "id": "z-ai/glm-4.5v", "provider": "openrouter", "family": "Z.ai", "status": "planned" },
 
     { "id": "bytedance-seed/seed-2.0-lite", "provider": "openrouter", "family": "ByteDance", "status": "planned" },
     { "id": "bytedance-seed/seed-2.0-mini", "provider": "openrouter", "family": "ByteDance", "status": "planned" },

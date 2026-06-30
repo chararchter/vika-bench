@@ -84,6 +84,11 @@ app.innerHTML = `
           <p>Models are included when they are available through OpenRouter, can accept image input, and can return structured JSON. Models that cannot see the reference image or cannot reliably return JSON are excluded from Track B.</p>
         </article>
         <article>
+          <p class="date">Excluded</p>
+          <h3>Z.ai</h3>
+          <p>Z.ai vision models are excluded from Track B v0.1 because OpenRouter returned no compatible route for the official image plus structured-output request during preflight.</p>
+        </article>
+        <article>
           <p class="date">Failures</p>
           <h3>No Retries</h3>
           <p>Failed API calls, invalid JSON, schema violations, and render failures are recorded in metadata and do not receive a replacement official attempt.</p>

@@ -46,6 +46,10 @@ The locked reference image is stored in the repository at `app/public/reference/
 
 See `runner/models.track-b.json`.
 
+## Exclusions
+
+Z.ai vision models are excluded from Track B v0.1 because OpenRouter returned no compatible route for the official image plus structured-output request during preflight.
+
 ## Planned Metrics
 
 - Elo from pairwise preference judgments
