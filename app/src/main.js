@@ -119,7 +119,7 @@ app.innerHTML = `
         <div class="leaderboard-tools">
           <div>
             <p class="date">Track B / Structured Drawing</p>
-            <p class="section-copy">Every model has a reserved slot. Scores, final images, cost, latency, command counts, and accountability metadata will fill in after official runs.</p>
+            <p class="section-copy">Every model has a reserved slot. Official rows include score, final image, cost, latency, command count, judge comparison count, and accountability hashes when a run completed; failed attempts remain visible with their official status.</p>
           </div>
           <label class="filter-control">
             <span>Family</span>
@@ -138,7 +138,9 @@ app.innerHTML = `
                 <th>Status</th>
                 <th>Elo</th>
                 <th>Cost</th>
+                <th>Latency</th>
                 <th>Commands</th>
+                <th>Audit</th>
               </tr>
             </thead>
             <tbody id="leaderboardRows"></tbody>
@@ -508,7 +510,7 @@ async function loadModelPlaceholders() {
     populateFamilyFilter(modelRegistry);
     renderModelPlaceholders();
   } catch (error) {
-    leaderboardRows.innerHTML = `<tr><td colspan="7">Could not load model registry.</td></tr>`;
+    leaderboardRows.innerHTML = `<tr><td colspan="9">Could not load model registry.</td></tr>`;
     modelGallery.innerHTML = `<p>${escapeHtml(error.message)}</p>`;
   }
 }
@@ -587,7 +589,9 @@ function renderModelPlaceholders() {
           <td><mark>${escapeHtml(result?.status || "Pending")}</mark></td>
           <td>${formatValue(result?.elo)}</td>
           <td>${formatCost(result?.cost_usd)}</td>
+          <td>${formatLatency(result?.wall_time_seconds)}</td>
           <td>${formatValue(result?.command_count)}</td>
+          <td>${renderAuditSummary(result)}</td>
         </tr>
       `;
     })
@@ -606,7 +610,10 @@ function renderModelPlaceholders() {
             <dl>
               <div><dt>Elo</dt><dd>${formatValue(result?.elo)}</dd></div>
               <div><dt>Cost</dt><dd>${formatCost(result?.cost_usd)}</dd></div>
+              <div><dt>Latency</dt><dd>${formatLatency(result?.wall_time_seconds)}</dd></div>
               <div><dt>Commands</dt><dd>${formatValue(result?.command_count)}</dd></div>
+              <div><dt>Judgments</dt><dd>${formatComparisons(result?.comparisons)}</dd></div>
+              <div><dt>Audit</dt><dd>${formatHash(result?.prompt_sha256)}</dd></div>
             </dl>
           </div>
         </article>
@@ -713,6 +720,35 @@ function formatValue(value) {
 function formatCost(value) {
   if (value === undefined || value === null) return "-";
   return `$${Number(value).toFixed(4)}`;
+}
+
+function formatLatency(value) {
+  if (value === undefined || value === null) return "-";
+  const seconds = Number(value);
+  if (!Number.isFinite(seconds)) return "-";
+  return `${seconds.toFixed(1)}s`;
+}
+
+function formatComparisons(value) {
+  if (value === undefined || value === null) return "-";
+  const comparisons = Number(value);
+  if (!Number.isFinite(comparisons)) return "-";
+  return String(comparisons);
+}
+
+function formatHash(value) {
+  if (!value) return "-";
+  return String(value).slice(0, 8);
+}
+
+function renderAuditSummary(result) {
+  if (!result) return "-";
+  return `
+    <span>pairs ${formatComparisons(result.comparisons)}</span>
+    <span>prompt ${formatHash(result.prompt_sha256)}</span>
+    <span>ref ${formatHash(result.reference_sha256)}</span>
+    <span>config ${formatHash(result.run_config_sha256)}</span>
+  `;
 }
 
 function escapeHtml(value) {

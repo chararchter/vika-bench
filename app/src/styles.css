@@ -334,7 +334,7 @@ select {
 .leaderboard-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 860px;
+  min-width: 1080px;
 }
 
 th,
@@ -446,10 +446,15 @@ dl div {
   min-width: 0;
   padding: 8px;
   border-right: 1px solid #000;
+  border-bottom: 1px solid #000;
 }
 
-dl div:last-child {
+dl div:nth-child(3n) {
   border-right: 0;
+}
+
+dl div:nth-last-child(-n + 3) {
+  border-bottom: 0;
 }
 
 dt {
@@ -460,6 +465,7 @@ dt {
 
 dd {
   margin: 4px 0 0;
+  overflow-wrap: anywhere;
 }
 
 .workspace {
