@@ -5,10 +5,14 @@ const ROOT = path.resolve(new URL("..", import.meta.url).pathname);
 const RESULTS_ROOT = path.join(ROOT, "results");
 const PUBLIC_RESULTS_ROOT = path.join(ROOT, "app/public/results");
 const PUBLIC_DATA_PATH = path.join(ROOT, "app/public/data/results.json");
+const DEFAULT_MANIFEST_PATH = path.join(ROOT, "runner/official-run-manifest.v0.1.json");
 
 const args = parseArgs(process.argv.slice(2));
-if (!args["run-id"]) {
-  console.error("Usage: node runner/publish-results.mjs --run-id <id> [--elo leaderboard/elo.json]");
+const manifestPath = resolveManifestPath(args);
+const runManifest = manifestPath ? loadRunManifest(manifestPath) : null;
+
+if (!args["run-id"] && !runManifest) {
+  console.error("Usage: node runner/publish-results.mjs --run-id <id> [--elo leaderboard/elo.json] or --run-manifest runner/official-run-manifest.v0.1.json");
   process.exit(1);
 }
 
@@ -18,19 +22,21 @@ const modelDirs = await fs.promises.readdir(RESULTS_ROOT, { withFileTypes: true 
 
 for (const entry of modelDirs) {
   if (!entry.isDirectory() || entry.name.startsWith("_")) continue;
-  const runDir = path.join(RESULTS_ROOT, entry.name, args["run-id"]);
+  const modelId = entry.name.replaceAll("__", "/");
+  const runId = runManifest ? resolveRunId(runManifest, modelId) : args["run-id"];
+  const runDir = path.join(RESULTS_ROOT, entry.name, runId);
   const metadataPath = path.join(runDir, "metadata.json");
   if (!fs.existsSync(metadataPath)) continue;
 
   const metadata = JSON.parse(await fs.promises.readFile(metadataPath, "utf8"));
-  const publicRunDir = path.join(PUBLIC_RESULTS_ROOT, entry.name, args["run-id"]);
+  const publicRunDir = path.join(PUBLIC_RESULTS_ROOT, entry.name, runId);
   const sourceImage = path.join(runDir, "final.png");
   let publicImage = null;
 
   if (fs.existsSync(sourceImage)) {
     await fs.promises.mkdir(publicRunDir, { recursive: true });
     await fs.promises.copyFile(sourceImage, path.join(publicRunDir, "final.png"));
-    publicImage = `/results/${entry.name}/${args["run-id"]}/final.png`;
+    publicImage = `/results/${entry.name}/${runId}/final.png`;
   }
 
   results.push({
@@ -38,7 +44,7 @@ for (const entry of modelDirs) {
     provider: metadata.provider,
     family: metadata.family,
     status: metadata.status,
-    run_id: args["run-id"],
+    run_id: runId,
     final_image: publicImage,
     elo: eloByModel.get(metadata.model)?.elo ?? null,
     comparisons: eloByModel.get(metadata.model)?.comparisons ?? 0,
@@ -65,13 +71,42 @@ await fs.promises.writeFile(PUBLIC_DATA_PATH, JSON.stringify({
   benchmark: "maddie-bench",
   track: "structured-drawing",
   version: "0.1",
-  run_id: args["run-id"],
+  run_id: args["run-id"] || null,
+  run_manifest: manifestPath ? path.relative(ROOT, manifestPath) : null,
   generated_at: new Date().toISOString(),
   elo_source: args.elo || null,
   results
 }, null, 2));
 
 console.log(`Published ${results.length} results to app/public/data/results.json.`);
+
+function resolveManifestPath(parsedArgs) {
+  if (parsedArgs["run-manifest"]) {
+    return path.isAbsolute(parsedArgs["run-manifest"])
+      ? parsedArgs["run-manifest"]
+      : path.join(ROOT, parsedArgs["run-manifest"]);
+  }
+
+  if (fs.existsSync(DEFAULT_MANIFEST_PATH)) {
+    return DEFAULT_MANIFEST_PATH;
+  }
+
+  return null;
+}
+
+function loadRunManifest(manifestPath) {
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  const overrides = new Map((manifest.overrides || []).map((entry) => [entry.model, entry.run_id]));
+  return {
+    path: manifestPath,
+    defaultRunId: manifest.default_run_id,
+    overrides
+  };
+}
+
+function resolveRunId(manifest, modelId) {
+  return manifest.overrides.get(modelId) || manifest.defaultRunId;
+}
 
 function loadElo(eloPath) {
   const payload = JSON.parse(fs.readFileSync(eloPath, "utf8"));

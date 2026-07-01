@@ -12,6 +12,10 @@ results/**/*
 results/**/raw-response.json
 results/**/request.json
 judgments/*/
+!judgments/official-v0.1-incremental-*/
+!judgments/official-v0.1-incremental-*/*
+!judgments/official-v0.1-judge-incremental-*/
+!judgments/official-v0.1-judge-incremental-*/*
 leaderboard/elo.*.json
 !leaderboard/elo.example.json
 !leaderboard/elo.official-v0.1.json
@@ -21,3 +25,9 @@ leaderboard/elo.*.json
 !results/**/official-v0.1/metadata.json
 !results/**/official-v0.1/raw-response.json
 !results/**/official-v0.1/request.json
+!results/**/official-v0.1-incremental-*/
+!results/**/official-v0.1-incremental-*/commands.json
+!results/**/official-v0.1-incremental-*/final.png
+!results/**/official-v0.1-incremental-*/metadata.json
+!results/**/official-v0.1-incremental-*/raw-response.json
+!results/**/official-v0.1-incremental-*/request.json

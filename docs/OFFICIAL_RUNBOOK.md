@@ -46,8 +46,20 @@ npm run elo -- --input judgments/official-v0.1-judge/pairwise.json --output lead
 ## 6. Publish Results to the Site
 
 ```bash
-npm run publish:results -- --run-id official-v0.1 --elo leaderboard/elo.official-v0.1.json
+npm run publish:results -- --run-manifest runner/official-run-manifest.v0.1.json --elo leaderboard/elo.official-v0.1.json
 npm run build:site
 ```
+
+## Incremental v0.1 Insertions
+
+If a later stable model becomes eligible for Track B v0.1 without changing the benchmark protocol:
+
+1. Add the model to `runner/models.track-b.json`.
+2. Run exactly one new official attempt with a new documented run id.
+3. Judge the new output blind against a fixed anchor set spanning strong, middle, and weak leaderboard positions plus provider-adjacent predecessors when available.
+4. Append only those new judgments to the official Elo source.
+5. Update `runner/official-run-manifest.v0.1.json` so the published site keeps the original `official-v0.1` runs for historical models and points only the inserted models at their incremental run ids.
+
+Historical outputs are not regenerated unless the benchmark protocol itself changes.
 
 After these commands, the official outputs, audit metadata, pairwise judgments, Elo file, public site data, and `/maddie-bench/` static build exist locally.

@@ -77,3 +77,11 @@ Run:
 npm run judge -- --run-id official-v0.1 --judgment-run-id official-v0.1-judge
 npm run elo -- --input judgments/pairwise.example.json --output leaderboard/elo.example.json
 ```
+
+## Leaderboard Update Policy
+
+- The initial Track B v0.1 release used the full official run.
+- Later stable models that fit the same v0.1 protocol get one new official attempt with the same prompt, reference image, renderer, and run config.
+- Those new models are judged blind only against a fixed anchor set spanning top, middle, lower valid outputs, plus provider-adjacent Anthropic predecessors when available.
+- The new judgments are appended to the official Elo source without rerunning full historical pairwise judging.
+- Historical outputs are not regenerated unless the benchmark protocol changes.

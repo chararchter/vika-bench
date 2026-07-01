@@ -1,0 +1,13 @@
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1782936910-qT74UIYTPQPp6R24Y0zs","object":"chat.completion","created":1782936910,"model":"google/gemini-3.5-flash-20260519","provider":"Google","system_fingerprint":null,"service_tier":"provisioned","choices":[{"index":0,"logprobs":null,"finish_reason":"stop","native_finish_reason":"STOP","message":{"role":"assistant","content":"{\n  \"winner\": \"a\",\n  \"confidence\": 0.8,\n  \"rationale\": \"Candidate A much better captures the human subject, the long dark hair framing the face, the hands pressed against the cheeks, and the overall composition of the reference image. Candidate B depicts a dog-like figure with glasses, which does not match the reference.\"\n}","refusal":null,"reasoning_details":[{"type":"reasoning.text","signature":"AY89a1+DWmkEvo6reuFt7qK2JF6Iei0w2or9SrdXwQMoKDEgDHTlZO0Kr1gk7h4Pcrg=","format":"google-gemini-v1","index":0}]}}],"usage":{"prompt_tokens":3586,"completion_tokens":79,"total_tokens":3665,"cost":0.00609,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.00609,"upstream_inference_prompt_cost":0.005379,"upstream_inference_completions_cost":0.000711},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0,"audio_tokens":0}}}

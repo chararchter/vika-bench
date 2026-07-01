@@ -1,0 +1,15 @@
+{
+  "benchmark": "maddie-bench",
+  "track": "structured-drawing",
+  "version": "0.1",
+  "judgment_run_id": "official-v0.1-judge-incremental-2026-07-01-anthropic-5",
+  "generated_at": "2026-07-01T20:16:28.814Z",
+  "policy": "Incremental v0.1 insertion merged with the original official blind pairwise judgments without regenerating historical pairs.",
+  "sources": [
+    "judgments/official-v0.1-judge/pairwise.json",
+    "judgments/official-v0.1-incremental-2026-07-01-anthropic-5-sonnet-5-judge/pairwise.json",
+    "judgments/official-v0.1-incremental-2026-07-01-anthropic-5-fable-5-judge/pairwise.json"
+  ],
+  "total_judgments": 3000,
+  "added_judgments": 30
+}

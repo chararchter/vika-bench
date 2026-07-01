@@ -1,0 +1,9 @@
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1782936946-raQIPBh9zRMzNaNq3DOA","object":"chat.completion","created":1782936946,"model":"google/gemini-3.5-flash-20260519","provider":"Google","system_fingerprint":null,"service_tier":"provisioned","choices":[{"index":0,"logprobs":null,"finish_reason":"stop","native_finish_reason":"STOP","message":{"role":"assistant","content":"{\n  \"winner\": \"a\",\n  \"confidence\": 0.7,\n  \"rationale\": \"Candidate A better captures the overall composition, including the dark hair framing the face and a more centered, vertical curtain-like background compared to Candidate B.\"\n}","refusal":null,"reasoning_details":[{"type":"reasoning.text","signature":"AY89a1+NdIRgjzZ+kl7lHBuP+pdWB/s3e+U4hB8na5fqNAiEUnCz7x9ug2YGCPIvjqc=","format":"google-gemini-v1","index":0}]}}],"usage":{"prompt_tokens":3586,"completion_tokens":58,"total_tokens":3644,"cost":0.005901,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.005901,"upstream_inference_prompt_cost":0.005379,"upstream_inference_completions_cost":0.000522},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0,"audio_tokens":0}}}

@@ -1,0 +1,21 @@
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1782936941-joy84gRXxA433OpYuUlo","object":"chat.completion","created":1782936941,"model":"anthropic/claude-4.8-opus-20260528","provider":"Anthropic","system_fingerprint":null,"service_tier":"default","choices":[{"index":0,"logprobs":null,"finish_reason":"stop","native_finish_reason":"end_turn","message":{"role":"assistant","content":"{\"winner\":\"a\",\"confidence\":0.6,\"rationale\":\"A better captures the composition: centered face with dark hair framing it, hands near cheeks, vertical wood-panel background, and grayscale/sepia tone. B has an open mouth but its face is distorted and hands are oddly placed. Both are stylized, but A's overall proportions and framing more closely resemble the reference.\"}","refusal":null}}],"usage":{"prompt_tokens":7509,"completion_tokens":127,"total_tokens":7636,"cost":0.04072,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.04072,"upstream_inference_prompt_cost":0.037545,"upstream_inference_completions_cost":0.003175},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0,"audio_tokens":0}}}

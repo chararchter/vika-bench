@@ -1,0 +1,17 @@
+{
+  "benchmark": "maddie-bench",
+  "track": "structured-drawing",
+  "version": "0.1",
+  "policy": "Use official-v0.1 for the initial release unless a model-specific override documents a later incremental v0.1 insertion.",
+  "default_run_id": "official-v0.1",
+  "overrides": [
+    {
+      "model": "anthropic/claude-fable-5",
+      "run_id": "official-v0.1-incremental-2026-07-01-anthropic-5"
+    },
+    {
+      "model": "anthropic/claude-sonnet-5",
+      "run_id": "official-v0.1-incremental-2026-07-01-anthropic-5"
+    }
+  ]
+}

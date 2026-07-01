@@ -17,13 +17,13 @@ Public site target: <https://maddiedreese.com/maddie-bench>
 
 - Paint app scaffolded.
 - Reference image locked at `1205 x 1448`.
-- Track B model registry scaffolded with 53 planned OpenRouter models.
+- Track B model registry includes 49 planned OpenRouter models.
 - Benchmark docs, benchmark card, runbook, and deployment notes are in place.
 - Audit metadata tracking is implemented in the runner.
 - Pairwise Elo calculator is implemented.
 - Pairwise Elo judge runner is implemented.
 - Elo judge panel configured as `openai/gpt-5.5`, `anthropic/claude-opus-4.8`, and `google/gemini-3.5-flash` via OpenRouter.
-- Official runs have not been published yet.
+- Official v0.1 results are published.
 
 ## Commands
 
@@ -39,6 +39,7 @@ npm run validate:audit -- --run-id audit-smoke
 npm run judge -- --run-id audit-smoke --dry-run --judgment-run-id judge-smoke
 npm run elo -- --input judgments/pairwise.example.json --output leaderboard/elo.example.json
 npm run publish:results -- --run-id full-chain-smoke --elo leaderboard/elo.full-chain-smoke.json
+npm run publish:results -- --run-manifest runner/official-run-manifest.v0.1.json --elo leaderboard/elo.official-v0.1.json
 npm run run:track-b -- --check-env
 npm run run:track-b -- --list
 npm run run:track-b -- --model openai/gpt-5.5 --dry-run

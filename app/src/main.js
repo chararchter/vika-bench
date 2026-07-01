@@ -108,6 +108,11 @@ app.innerHTML = `
           <h3>openai/gpt-5.5 + anthropic/claude-opus-4.8 + google/gemini-3.5-flash</h3>
           <p>Rendered outputs are judged blind through OpenRouter by the panel configured in runner/judge-config.json. Model names are hidden from judges.</p>
         </article>
+        <article>
+          <p class="date">Updates</p>
+          <h3>Leaderboard Update Policy</h3>
+          <p>The initial release used the full official run. Later stable models are inserted with one new official attempt and blind judging against a fixed anchor set spanning top, middle, bottom, and provider-adjacent outputs. Historical outputs are not regenerated unless the benchmark protocol changes.</p>
+        </article>
       </div>
     </details>
 
@@ -347,7 +352,7 @@ npm run run:track-b -- --all --run-id official-v0.1 --concurrency 4
 npm run validate:audit -- --run-id official-v0.1
 npm run judge -- --run-id official-v0.1 --judgment-run-id official-v0.1-judge --concurrency 12
 npm run elo -- --input judgments/official-v0.1-judge/pairwise.json --output leaderboard/elo.official-v0.1.json
-npm run publish:results -- --run-id official-v0.1 --elo leaderboard/elo.official-v0.1.json</code></pre>
+npm run publish:results -- --run-manifest runner/official-run-manifest.v0.1.json --elo leaderboard/elo.official-v0.1.json</code></pre>
       </div>
     </details>
 
