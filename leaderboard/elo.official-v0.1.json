@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-01T20:16:29.085Z",
+  "generated_at": "2026-07-01T20:24:55.097Z",
   "k_factor": 32,
-  "judgments": 3000,
+  "judgments": 3075,
   "leaderboard": [
     {
       "model": "sakana/fugu-ultra",
@@ -10,23 +10,23 @@
     },
     {
       "model": "openai/gpt-5.5",
-      "elo": 1515,
-      "comparisons": 132
+      "elo": 1524,
+      "comparisons": 138
     },
     {
       "model": "qwen/qwen3.6-plus",
-      "elo": 1504,
-      "comparisons": 132
+      "elo": 1513,
+      "comparisons": 138
     },
     {
       "model": "google/gemini-3.5-flash",
-      "elo": 1472,
-      "comparisons": 132
+      "elo": 1483,
+      "comparisons": 138
     },
     {
       "model": "google/gemini-3-flash-preview",
-      "elo": 1462,
-      "comparisons": 132
+      "elo": 1474,
+      "comparisons": 138
     },
     {
       "model": "openai/gpt-5-pro",
@@ -59,6 +59,11 @@
       "comparisons": 132
     },
     {
+      "model": "anthropic/claude-fable-5",
+      "elo": 1223,
+      "comparisons": 54
+    },
+    {
       "model": "qwen/qwen3.7-plus",
       "elo": 1212,
       "comparisons": 132
@@ -72,6 +77,11 @@
       "model": "minimax/minimax-m3",
       "elo": 1160,
       "comparisons": 132
+    },
+    {
+      "model": "anthropic/claude-sonnet-5",
+      "elo": 1159,
+      "comparisons": 54
     },
     {
       "model": "openai/gpt-5.4-nano",
@@ -89,48 +99,23 @@
       "comparisons": 132
     },
     {
-      "model": "anthropic/claude-fable-5",
-      "elo": 1101,
-      "comparisons": 15
-    },
-    {
       "model": "anthropic/claude-opus-4.8",
-      "elo": 1074,
-      "comparisons": 138
-    },
-    {
-      "model": "anthropic/claude-sonnet-4.5",
-      "elo": 1074,
-      "comparisons": 132
-    },
-    {
-      "model": "anthropic/claude-sonnet-5",
-      "elo": 1048,
-      "comparisons": 15
-    },
-    {
-      "model": "moonshotai/kimi-k2.5",
-      "elo": 1046,
-      "comparisons": 132
-    },
-    {
-      "model": "google/gemini-3.1-pro-preview",
-      "elo": 1038,
-      "comparisons": 132
-    },
-    {
-      "model": "anthropic/claude-opus-4.6",
-      "elo": 1034,
-      "comparisons": 132
-    },
-    {
-      "model": "anthropic/claude-opus-4.5",
-      "elo": 1008,
+      "elo": 1080,
       "comparisons": 132
     },
     {
       "model": "anthropic/claude-sonnet-4.6",
+      "elo": 1038,
+      "comparisons": 138
+    },
+    {
+      "model": "anthropic/claude-sonnet-4.5",
       "elo": 1007,
+      "comparisons": 138
+    },
+    {
+      "model": "moonshotai/kimi-k2.5",
+      "elo": 1003,
       "comparisons": 138
     },
     {
@@ -139,14 +124,29 @@
       "comparisons": 132
     },
     {
+      "model": "openai/gpt-5",
+      "elo": 960,
+      "comparisons": 138
+    },
+    {
+      "model": "anthropic/claude-opus-4.6",
+      "elo": 955,
+      "comparisons": 138
+    },
+    {
+      "model": "google/gemini-3.1-pro-preview",
+      "elo": 947,
+      "comparisons": 138
+    },
+    {
+      "model": "anthropic/claude-opus-4.5",
+      "elo": 943,
+      "comparisons": 138
+    },
+    {
       "model": "bytedance-seed/seed-2.0-lite",
       "elo": 922,
       "comparisons": 132
-    },
-    {
-      "model": "openai/gpt-5",
-      "elo": 910,
-      "comparisons": 138
     },
     {
       "model": "bytedance-seed/seed-1.6",
@@ -215,27 +215,27 @@
     },
     {
       "model": "mistralai/mistral-small-2603",
-      "elo": 514,
-      "comparisons": 132
+      "elo": 509,
+      "comparisons": 138
     },
     {
       "model": "qwen/qwen3-vl-8b-instruct",
-      "elo": 498,
-      "comparisons": 132
+      "elo": 494,
+      "comparisons": 138
     },
     {
       "model": "openai/gpt-5-nano",
-      "elo": 486,
-      "comparisons": 132
+      "elo": 481,
+      "comparisons": 138
     },
     {
       "model": "x-ai/grok-4.3",
-      "elo": 377,
-      "comparisons": 132
+      "elo": 375,
+      "comparisons": 138
     },
     {
       "model": "rekaai/reka-edge",
-      "elo": 261,
+      "elo": 262,
       "comparisons": 138
     }
   ]
