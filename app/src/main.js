@@ -9,6 +9,7 @@ import {
 import "./styles.css";
 
 const PUBLIC_BASE = import.meta.env.BASE_URL || "/";
+const SOURCE_REPO_URL = "https://github.com/maddiedreese/maddie-bench";
 const app = document.querySelector("#app");
 
 app.innerHTML = `
@@ -615,7 +616,7 @@ function renderModelPlaceholders() {
               <div><dt>Latency</dt><dd>${formatLatency(result?.wall_time_seconds)}</dd></div>
               <div><dt>Commands</dt><dd>${formatValue(result?.command_count)}</dd></div>
               <div><dt>Judgments</dt><dd>${formatComparisons(result?.comparisons)}</dd></div>
-              <div><dt>Audit</dt><dd>${formatHash(result?.prompt_sha256)}</dd></div>
+              <div><dt>Audit</dt><dd>${renderGalleryAuditLink(model, result)}</dd></div>
             </dl>
           </div>
         </article>
@@ -731,6 +732,21 @@ function prettyModelName(id) {
 
 function galleryAnchorId(modelId) {
   return `gallery-${modelId.replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "").toLowerCase()}`;
+}
+
+function resultDirectoryName(modelId) {
+  return modelId.replaceAll("/", "__");
+}
+
+function auditTrailUrl(model, result) {
+  if (!result?.run_id) return null;
+  return `${SOURCE_REPO_URL}/tree/main/results/${resultDirectoryName(model.id)}/${result.run_id}`;
+}
+
+function renderGalleryAuditLink(model, result) {
+  const url = auditTrailUrl(model, result);
+  if (!url) return "-";
+  return `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${formatHash(result.prompt_sha256)}</a>`;
 }
 
 function publicUrl(path) {

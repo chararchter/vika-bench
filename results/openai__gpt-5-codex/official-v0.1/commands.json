@@ -1,0 +1,602 @@
+[
+  {
+    "type": "stroke",
+    "color": "#8f8377",
+    "size": 160,
+    "opacity": 0.6,
+    "composite": "source-over",
+    "points": [
+      [
+        180,
+        0
+      ],
+      [
+        180,
+        1448
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#a79d91",
+    "size": 160,
+    "opacity": 0.6,
+    "composite": "source-over",
+    "points": [
+      [
+        430,
+        0
+      ],
+      [
+        430,
+        1448
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#bcb2a7",
+    "size": 160,
+    "opacity": 0.5,
+    "composite": "source-over",
+    "points": [
+      [
+        690,
+        0
+      ],
+      [
+        690,
+        1448
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#91867a",
+    "size": 160,
+    "opacity": 0.5,
+    "composite": "source-over",
+    "points": [
+      [
+        960,
+        0
+      ],
+      [
+        960,
+        1448
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#2d2625",
+    "size": 160,
+    "opacity": 0.85,
+    "composite": "source-over",
+    "points": [
+      [
+        790,
+        260
+      ],
+      [
+        860,
+        620
+      ],
+      [
+        800,
+        1080
+      ],
+      [
+        600,
+        1220
+      ],
+      [
+        400,
+        1080
+      ],
+      [
+        340,
+        640
+      ],
+      [
+        420,
+        260
+      ],
+      [
+        600,
+        220
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#1d1818",
+    "size": 120,
+    "opacity": 0.85,
+    "composite": "source-over",
+    "points": [
+      [
+        730,
+        300
+      ],
+      [
+        760,
+        620
+      ],
+      [
+        720,
+        900
+      ],
+      [
+        480,
+        900
+      ],
+      [
+        450,
+        600
+      ],
+      [
+        500,
+        300
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#4c4341",
+    "size": 120,
+    "opacity": 0.65,
+    "composite": "source-over",
+    "points": [
+      [
+        800,
+        340
+      ],
+      [
+        780,
+        780
+      ],
+      [
+        650,
+        1090
+      ],
+      [
+        450,
+        820
+      ],
+      [
+        420,
+        360
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#d7cfc6",
+    "size": 160,
+    "opacity": 0.78,
+    "composite": "source-over",
+    "points": [
+      [
+        600,
+        340
+      ],
+      [
+        600,
+        790
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#e4ddd3",
+    "size": 120,
+    "opacity": 0.6,
+    "composite": "source-over",
+    "points": [
+      [
+        600,
+        400
+      ],
+      [
+        600,
+        720
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#b9a99b",
+    "size": 140,
+    "opacity": 0.55,
+    "composite": "source-over",
+    "points": [
+      [
+        510,
+        420
+      ],
+      [
+        480,
+        720
+      ],
+      [
+        520,
+        880
+      ],
+      [
+        680,
+        880
+      ],
+      [
+        720,
+        720
+      ],
+      [
+        690,
+        420
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#c3b6aa",
+    "size": 120,
+    "opacity": 0.6,
+    "composite": "source-over",
+    "points": [
+      [
+        600,
+        780
+      ],
+      [
+        600,
+        1000
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#d5c8bd",
+    "size": 140,
+    "opacity": 0.75,
+    "composite": "source-over",
+    "points": [
+      [
+        470,
+        620
+      ],
+      [
+        420,
+        900
+      ],
+      [
+        470,
+        1140
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#d7cabe",
+    "size": 140,
+    "opacity": 0.75,
+    "composite": "source-over",
+    "points": [
+      [
+        730,
+        620
+      ],
+      [
+        780,
+        900
+      ],
+      [
+        730,
+        1140
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#b9a698",
+    "size": 60,
+    "opacity": 0.7,
+    "composite": "source-over",
+    "points": [
+      [
+        460,
+        640
+      ],
+      [
+        420,
+        900
+      ],
+      [
+        460,
+        1120
+      ],
+      [
+        740,
+        1120
+      ],
+      [
+        780,
+        900
+      ],
+      [
+        740,
+        640
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#f0ebe5",
+    "size": 80,
+    "opacity": 0.9,
+    "composite": "source-over",
+    "points": [
+      [
+        520,
+        515
+      ],
+      [
+        520,
+        575
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#f0ebe5",
+    "size": 80,
+    "opacity": 0.9,
+    "composite": "source-over",
+    "points": [
+      [
+        690,
+        515
+      ],
+      [
+        690,
+        575
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#4a4342",
+    "size": 40,
+    "opacity": 0.8,
+    "composite": "source-over",
+    "points": [
+      [
+        470,
+        500
+      ],
+      [
+        560,
+        485
+      ],
+      [
+        640,
+        485
+      ],
+      [
+        730,
+        500
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#3a3839",
+    "size": 55,
+    "opacity": 0.9,
+    "composite": "source-over",
+    "points": [
+      [
+        520,
+        545
+      ],
+      [
+        520,
+        560
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#3a3839",
+    "size": 55,
+    "opacity": 0.9,
+    "composite": "source-over",
+    "points": [
+      [
+        690,
+        545
+      ],
+      [
+        690,
+        560
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#171517",
+    "size": 30,
+    "opacity": 1,
+    "composite": "source-over",
+    "points": [
+      [
+        520,
+        550
+      ],
+      [
+        520,
+        554
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#171517",
+    "size": 30,
+    "opacity": 1,
+    "composite": "source-over",
+    "points": [
+      [
+        690,
+        550
+      ],
+      [
+        690,
+        554
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#3e3736",
+    "size": 50,
+    "opacity": 0.82,
+    "composite": "source-over",
+    "points": [
+      [
+        470,
+        470
+      ],
+      [
+        540,
+        450
+      ],
+      [
+        660,
+        450
+      ],
+      [
+        730,
+        470
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#a49387",
+    "size": 60,
+    "opacity": 0.6,
+    "composite": "source-over",
+    "points": [
+      [
+        600,
+        540
+      ],
+      [
+        600,
+        660
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#261f20",
+    "size": 90,
+    "opacity": 0.9,
+    "composite": "source-over",
+    "points": [
+      [
+        600,
+        680
+      ],
+      [
+        600,
+        780
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#5d4f4d",
+    "size": 70,
+    "opacity": 0.7,
+    "composite": "source-over",
+    "points": [
+      [
+        600,
+        780
+      ],
+      [
+        600,
+        840
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#312726",
+    "size": 140,
+    "opacity": 0.8,
+    "composite": "source-over",
+    "points": [
+      [
+        520,
+        1100
+      ],
+      [
+        500,
+        1300
+      ],
+      [
+        700,
+        1300
+      ],
+      [
+        700,
+        1100
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#e3d8cd",
+    "size": 80,
+    "opacity": 0.6,
+    "composite": "source-over",
+    "points": [
+      [
+        500,
+        660
+      ],
+      [
+        460,
+        880
+      ],
+      [
+        500,
+        1080
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "color": "#e4d9ce",
+    "size": 80,
+    "opacity": 0.6,
+    "composite": "source-over",
+    "points": [
+      [
+        720,
+        660
+      ],
+      [
+        760,
+        880
+      ],
+      [
+        720,
+        1080
+      ]
+    ]
+  }
+]

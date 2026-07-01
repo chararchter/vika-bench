@@ -1,0 +1,23 @@
+[
+  {
+    "type": "stroke",
+    "color": "#201b1b",
+    "size": 12,
+    "opacity": 0.82,
+    "composite": "source-over",
+    "points": [
+      [
+        300,
+        300
+      ],
+      [
+        320,
+        330
+      ],
+      [
+        360,
+        380
+      ]
+    ]
+  }
+]

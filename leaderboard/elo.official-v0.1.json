@@ -1,0 +1,232 @@
+{
+  "generated_at": "2026-06-30T07:36:23.613Z",
+  "k_factor": 32,
+  "judgments": 2970,
+  "leaderboard": [
+    {
+      "model": "sakana/fugu-ultra",
+      "elo": 1698,
+      "comparisons": 132
+    },
+    {
+      "model": "openai/gpt-5.5",
+      "elo": 1515,
+      "comparisons": 132
+    },
+    {
+      "model": "qwen/qwen3.6-plus",
+      "elo": 1504,
+      "comparisons": 132
+    },
+    {
+      "model": "google/gemini-3.5-flash",
+      "elo": 1472,
+      "comparisons": 132
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "elo": 1462,
+      "comparisons": 132
+    },
+    {
+      "model": "openai/gpt-5-pro",
+      "elo": 1397,
+      "comparisons": 132
+    },
+    {
+      "model": "openai/gpt-5-codex",
+      "elo": 1380,
+      "comparisons": 132
+    },
+    {
+      "model": "moonshotai/kimi-k2.7-code",
+      "elo": 1368,
+      "comparisons": 132
+    },
+    {
+      "model": "openai/gpt-5.4-pro",
+      "elo": 1367,
+      "comparisons": 132
+    },
+    {
+      "model": "x-ai/grok-4.20-multi-agent",
+      "elo": 1299,
+      "comparisons": 132
+    },
+    {
+      "model": "anthropic/claude-opus-4.8-fast",
+      "elo": 1248,
+      "comparisons": 132
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "elo": 1212,
+      "comparisons": 132
+    },
+    {
+      "model": "openai/gpt-5.3-codex",
+      "elo": 1166,
+      "comparisons": 132
+    },
+    {
+      "model": "minimax/minimax-m3",
+      "elo": 1160,
+      "comparisons": 132
+    },
+    {
+      "model": "openai/gpt-5.4-nano",
+      "elo": 1143,
+      "comparisons": 132
+    },
+    {
+      "model": "openai/gpt-5.4-mini",
+      "elo": 1130,
+      "comparisons": 132
+    },
+    {
+      "model": "openai/gpt-5.4",
+      "elo": 1116,
+      "comparisons": 132
+    },
+    {
+      "model": "anthropic/claude-opus-4.8",
+      "elo": 1080,
+      "comparisons": 132
+    },
+    {
+      "model": "anthropic/claude-sonnet-4.5",
+      "elo": 1074,
+      "comparisons": 132
+    },
+    {
+      "model": "anthropic/claude-sonnet-4.6",
+      "elo": 1071,
+      "comparisons": 132
+    },
+    {
+      "model": "moonshotai/kimi-k2.5",
+      "elo": 1046,
+      "comparisons": 132
+    },
+    {
+      "model": "google/gemini-3.1-pro-preview",
+      "elo": 1038,
+      "comparisons": 132
+    },
+    {
+      "model": "anthropic/claude-opus-4.6",
+      "elo": 1034,
+      "comparisons": 132
+    },
+    {
+      "model": "anthropic/claude-opus-4.5",
+      "elo": 1008,
+      "comparisons": 132
+    },
+    {
+      "model": "openai/gpt-5",
+      "elo": 990,
+      "comparisons": 132
+    },
+    {
+      "model": "anthropic/claude-opus-4.7",
+      "elo": 972,
+      "comparisons": 132
+    },
+    {
+      "model": "bytedance-seed/seed-2.0-lite",
+      "elo": 922,
+      "comparisons": 132
+    },
+    {
+      "model": "bytedance-seed/seed-1.6",
+      "elo": 866,
+      "comparisons": 132
+    },
+    {
+      "model": "qwen/qwen3-vl-235b-a22b-instruct",
+      "elo": 865,
+      "comparisons": 132
+    },
+    {
+      "model": "qwen/qwen3-vl-235b-a22b-thinking",
+      "elo": 858,
+      "comparisons": 132
+    },
+    {
+      "model": "bytedance-seed/seed-2.0-mini",
+      "elo": 845,
+      "comparisons": 132
+    },
+    {
+      "model": "anthropic/claude-haiku-4.5",
+      "elo": 841,
+      "comparisons": 132
+    },
+    {
+      "model": "openai/gpt-5-mini",
+      "elo": 839,
+      "comparisons": 132
+    },
+    {
+      "model": "x-ai/grok-4.20",
+      "elo": 799,
+      "comparisons": 132
+    },
+    {
+      "model": "mistralai/mistral-large-2512",
+      "elo": 744,
+      "comparisons": 132
+    },
+    {
+      "model": "google/gemini-3.1-flash-lite",
+      "elo": 743,
+      "comparisons": 132
+    },
+    {
+      "model": "qwen/qwen3.6-flash",
+      "elo": 739,
+      "comparisons": 132
+    },
+    {
+      "model": "mistralai/mistral-medium-3-5",
+      "elo": 666,
+      "comparisons": 132
+    },
+    {
+      "model": "qwen/qwen3-vl-32b-instruct",
+      "elo": 613,
+      "comparisons": 132
+    },
+    {
+      "model": "mistralai/mistral-medium-3.1",
+      "elo": 572,
+      "comparisons": 132
+    },
+    {
+      "model": "mistralai/mistral-small-2603",
+      "elo": 514,
+      "comparisons": 132
+    },
+    {
+      "model": "qwen/qwen3-vl-8b-instruct",
+      "elo": 498,
+      "comparisons": 132
+    },
+    {
+      "model": "openai/gpt-5-nano",
+      "elo": 486,
+      "comparisons": 132
+    },
+    {
+      "model": "x-ai/grok-4.3",
+      "elo": 377,
+      "comparisons": 132
+    },
+    {
+      "model": "rekaai/reka-edge",
+      "elo": 264,
+      "comparisons": 132
+    }
+  ]
+}

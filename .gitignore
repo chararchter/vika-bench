@@ -14,3 +14,10 @@ results/**/request.json
 judgments/*/
 leaderboard/elo.*.json
 !leaderboard/elo.example.json
+!leaderboard/elo.official-v0.1.json
+!results/**/official-v0.1/
+!results/**/official-v0.1/commands.json
+!results/**/official-v0.1/final.png
+!results/**/official-v0.1/metadata.json
+!results/**/official-v0.1/raw-response.json
+!results/**/official-v0.1/request.json
