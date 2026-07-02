@@ -50,8 +50,8 @@ npm run judge -- --run-id official-v0.1 --judgment-run-id official-v0.1-judge --
 ## Local Setup
 
 ```bash
-git clone https://github.com/maddiedreese/maddie-bench.git
-cd maddie-bench
+git clone https://github.com/chararchter/vika-bench.git
+cd vika-bench
 npm run setup
 cp .env.example .env
 ```
