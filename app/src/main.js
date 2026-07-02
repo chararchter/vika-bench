@@ -15,9 +15,22 @@ const app = document.querySelector("#app");
 app.innerHTML = `
   <header class="site-header">
     <p class="kicker">maddie-bench / @maddiedreese</p>
-    <h1>maddie-bench</h1>
+    <h1>vika-bench</h1>
     <p class="handle">Track B: Structured Drawing</p>
-    <p class="intro">A benchmark for AI models that recreate Maddie's profile picture by emitting paintbrush commands for a constrained canvas. Official model and judge calls run through OpenRouter.</p>
+    <p><mark>
+    Vika Bench is a fork of 
+    <a href="https://github.com/maddiedreese/maddie-bench" target="_blank" rel="noopener noreferrer">maddie-bench</a>,
+    created by <a href="https://www.maddiedreese.com" target="_blank" rel="noopener noreferrer">Maddie D. Reese</a>.</mark></p>
+    <p><mark>The original benchmark can be viewed at
+    <a href="https://www.maddiedreese.com/maddie-bench" target="_blank" rel="noopener noreferrer">maddiedreese.com/maddie-bench</a>.
+    </mark></p>
+    <p><mark>
+      If you use or reference this benchmark, please also cite the original work:
+      <em>Reese, M. D. maddie-bench Track B: Structured Drawing, 2026.</em>
+    </mark></p>
+    <p class="intro"> 
+    A benchmark for AI models that recreate Vika's profile picture by emitting paintbrush commands for a constrained canvas. Official model and judge calls run through OpenRouter.</p>
+    <p class="intro"> Maddie bench except Vika's picture, so Vika bench.</p>
     <div class="header-actions">
       <nav class="profile-links" aria-label="Benchmark links">
         <a class="button-primary" href="#leaderboard">Leaderboard</a>
@@ -26,7 +39,7 @@ app.innerHTML = `
         <a href="#paint-harness">Paint Harness</a>
         <a href="#protocol">Protocol</a>
         <a href="#downloads">Downloads</a>
-        <a href="https://github.com/maddiedreese/maddie-bench">GitHub</a>
+        <a href="https://github.com/chararchter/vika-bench">GitHub</a>
       </nav>
     </div>
     <nav class="section-nav" aria-label="Page sections">
@@ -62,16 +75,16 @@ app.innerHTML = `
     </section>
 
     <section class="consent-banner" aria-label="Reference image consent and license">
-      <p><strong>Reference image use:</strong> Maddie's profile picture is included with consent for maddie-bench evaluation only. Do not reuse it for unrelated datasets, scraping, training, or derivative benchmark tasks.</p>
+      <p><strong>Reference image use:</strong> Vika's profile picture is included with consent for vika-bench evaluation only. Do not reuse it for unrelated datasets, scraping, training, or derivative benchmark tasks.</p>
     </section>
 
     <section class="reference-overview" aria-label="Benchmark reference image">
       <div>
         <p class="date">Reference</p>
-        <h2>Maddie's profile picture</h2>
+        <h2>Vika's profile picture</h2>
         <p>Every Track B model receives this exact image and attempts to recreate it as compact paintbrush commands on a 1205 x 1448 canvas.</p>
       </div>
-      <img src="${PUBLIC_BASE}reference/maddie-target.jpg" alt="Maddie's profile picture benchmark reference" />
+      <img src="${PUBLIC_BASE}reference/maddie-target.jpg" alt="Vika's profile picture benchmark reference" />
     </section>
 
     <details class="site-section methodology-section" id="methodology" open>

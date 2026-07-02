@@ -368,6 +368,16 @@ mark {
   text-transform: uppercase;
 }
 
+/* Targets only the <mark> elements inside the site-header */
+.site-header mark {
+  background-color: yellow; 
+  color: black; 
+  border: none; 
+  padding: 3px 6px;
+  text-transform: none; 
+  display: inline;
+}
+
 .leaderboard-thumb {
   display: grid;
   place-items: center;
